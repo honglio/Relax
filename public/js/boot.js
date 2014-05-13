@@ -4,6 +4,9 @@ require.config({
     Underscore: '/js/libs/underscore',
     Backbone: '/js/libs/backbone',
     text: '/js/libs/text',
+    SocialNetView: 'js/SocialNetView',
+
+    models: 'models',
     templates: '../templates'
   },
 
