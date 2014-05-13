@@ -4,10 +4,11 @@ require.config({
     Underscore: '/js/libs/underscore',
     Backbone: '/js/libs/backbone',
     text: '/js/libs/text',
-    SocialNetView: 'js/SocialNetView',
+    SocialNetView: '/js/SocialNetView',
 
+    // directory map
     models: 'models',
-    templates: '../templates'
+    templates: '/templates'
   },
 
   shim: {

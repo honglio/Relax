@@ -2,8 +2,7 @@ define(['SocialNetView', 'text!templates/profile.html',
         'text!templates/status.html', 'models/Status',
         'views/Status'],
 function(SocialNetView,  profileTemplate,
-         statusTemplate, Status, StatusView)
-{
+         statusTemplate, Status, StatusView) {
   var profileView = SocialNetView.extend({
     el: $('#content'),
 
@@ -13,7 +12,7 @@ function(SocialNetView,  profileTemplate,
 
     render: function() {
       this.$el.html(
-        _.template(profileTemplate,this.model.toJSON())
+        _.template(profileTemplate, this.model.toJSON())
       );
 
       var statusCollection = this.model.get('status');

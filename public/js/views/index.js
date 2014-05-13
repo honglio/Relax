@@ -35,7 +35,7 @@ define(['SocialNetView', 'text!templates/index.html',
                 statusCollection.add(new Status({status:statusText}))
             });
             return false;
-        }
+        },
 
         render: function() {
             this.$el.html(indexTemplate);

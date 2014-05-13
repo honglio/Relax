@@ -78,7 +78,7 @@ module.exports = function(config, mongoose, nodemailer) {
     });
   };
 
-  var findById = function(account, callback) {
+  var findById = function(accountId, callback) {
     Account.findOne({_id:accountId}, function(err, doc) {
       callback(doc);
     });
