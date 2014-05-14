@@ -9,6 +9,16 @@ module.exports = function(config, mongoose, nodemailer) {
     status:    { type: String }
   });
 
+  var Contact = new mongoose.Schema({
+    name: {
+      first:   { type: String },
+      last:    { type: String }
+    },
+    accountId: { type: mongoose.Schema.ObjectId },
+    added:     { type: Date },     // When the contact was added
+    updated:   { type: Date }      // When the contact last updated
+  });
+
   var AccountSchema = new mongoose.Schema({
     email:     { type: String, unique: true },
     password:  { type: String },
@@ -23,6 +33,7 @@ module.exports = function(config, mongoose, nodemailer) {
     },
     photoUrl:  { type: String },
     biography: { type: String },
+    contacts:  [Contact],
     status:    [Status], // My own status updates only
     activity:  [Status]  // All status updates including friends
   });
@@ -82,7 +93,56 @@ module.exports = function(config, mongoose, nodemailer) {
     Account.findOne({_id:accountId}, function(err, doc) {
       callback(doc);
     });
-  }
+  };
+
+  var findByString = function(searchStr, callback) {
+    var searchRegex = new RegExp(searchStr, 'i');
+    Account.find({
+      $or: [
+        { 'name.full': { $regex: searchRegex } },
+        { email:       { $regex: searchRegex } }
+      ]
+    }, callback);
+  };
+
+  var addContact = function(account, addContact) {
+    var contact = {
+      name: addContact.name,
+      accountId: addContact._id,
+      added: new Date(),
+      updated: new Date()
+    };
+    account.contacts.push(contact);
+
+    account.save(function (err) {
+      if (err) {
+        console.log('Error saving account: ' + err);
+      }
+    });
+  };
+
+  var removeContact = function(account, contactId) {
+    if ( null == account.contacts ) return;
+
+    account.contacts.forEach(function(contact) {
+      if ( contact.accountId == contactId ) {
+        account.contacts.remove(contact);
+      }
+    });
+    account.save();
+  };
+
+  // check if has contact
+  var hasContact = function(account, contactId) {
+    if ( null == account.contacts ) return false;
+
+    account.contacts.forEach(function(contact) {
+      if ( contact.accountId == contactId ) {
+        return true;
+      }
+    });
+    return false;
+  };
 
   var register = function(email, password, firstName, lastName) {
     var shaSum = crypto.createHash('sha256');
@@ -103,10 +163,14 @@ module.exports = function(config, mongoose, nodemailer) {
 
   return {
     findById: findById,
+    findByString: findByString,
     register: register,
     forgotPassword: forgotPassword,
     changePassword: changePassword,
     login: login,
-    Account: Account
+    Account: Account,
+    hasContact: hasContact,
+    addContact: addContact,
+    removeContact: removeContact
   }
 }
