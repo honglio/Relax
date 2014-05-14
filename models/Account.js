@@ -1,5 +1,14 @@
-module.exports = function(config, mongoose, nodemailer) {
+module.exports = function(app, config, mongoose, nodemailer) {
   var crypto = require('crypto');
+
+  var schemaOptions = {
+    toJSON: {
+      virtuals: true
+    },
+    toObject: {
+      virtuals: true
+    }
+  };
 
   var Status = new mongoose.Schema({
     name: {
@@ -17,6 +26,10 @@ module.exports = function(config, mongoose, nodemailer) {
     accountId: { type: mongoose.Schema.ObjectId },
     added:     { type: Date },     // When the contact was added
     updated:   { type: Date }      // When the contact last updated
+  }, schemaOptions);
+
+  Contact.virtual('online').get(function(){
+    return app.isAccountOnline(this.get('accountId'));
   });
 
   var AccountSchema = new mongoose.Schema({
@@ -24,7 +37,8 @@ module.exports = function(config, mongoose, nodemailer) {
     password:  { type: String },
     name: {
       first:   { type: String },
-      last:    { type: String }
+      last:    { type: String },
+      full:    { type: String }
     },
     birthday: {
       day:     { type: Number, min: 1, max: 31, required: false },
@@ -91,7 +105,6 @@ module.exports = function(config, mongoose, nodemailer) {
 
   var findById = function(accountId, callback) {
     Account.findOne({_id:accountId}, function(err, doc) {
-      console.log(doc);
       callback(doc);
     });
   };
@@ -100,15 +113,13 @@ module.exports = function(config, mongoose, nodemailer) {
     var searchRegex = new RegExp(searchStr, 'i');
     Account.find({
       $or: [
-        { 'name.first': { $regex: searchRegex } },
-        { 'name.last':  { $regex: searchRegex } },
+        { 'name.full':  { $regex: searchRegex } },
         { email:        { $regex: searchRegex } }
       ]
     }, callback);
   };
 
   var addContact = function(account, addContact) {
-    console.log(addContact)
     var contact = {
       name: {
         first: addContact.name.first,
@@ -159,7 +170,8 @@ module.exports = function(config, mongoose, nodemailer) {
       email: email,
       name: {
         first: firstName,
-        last: lastName
+        last: lastName,
+        full: firstName + ' ' + lastName
       },
       password: shaSum.digest('hex')
     });

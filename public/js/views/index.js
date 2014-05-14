@@ -8,7 +8,8 @@ define(['SocialNetView', 'text!templates/index.html',
             "submit form": "updateStatus"
         },
 
-        initialize: function() {
+        initialize: function(options) {
+            options.socketEvents.bind( 'status:me', this.onSocketStatusAdded, this );
             this.collection.on('add', this.onStatusAdded, this);
             this.collection.on('reset', this.onStatusCollectionReset, this);
         },
@@ -17,13 +18,25 @@ define(['SocialNetView', 'text!templates/index.html',
             var that = this;
             collection.each(function(model) {
                 that.onStatusAdded(model);
-            })
+            });
+        },
+
+        onSocketStatusAdded: function(data) {
+            var newStatus = data.data;
+            var found = false;
+            this.collection.forEach(function(status) {
+                var name = status.get('name');
+                if ( name && name.full == newStatus.name.full && status.get('status') == newStatus.status ) {
+                    found = true;
+                }
+            });
+            if (!found) {
+                this.collection.add(new Status({status:newStatus.status, name:newStatus.name}))
+            }
         },
 
         onStatusAdded: function(status) {
-            var statusHtml = (new StatusView({
-                model: status
-            })).render().el;
+            var statusHtml = (new StatusView({ model: status })).render().el;
             $(statusHtml).prependTo('.status_list').hide().fadeIn('slow');
         },
 

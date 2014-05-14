@@ -8,13 +8,15 @@ define(['SocialNetView', 'text!templates/login.html'], function(SocialNetView, l
       "submit form": "login"
     },
 
+    initialize: function(options) {
+      this.socketEvents = options.socketEvents;
+    },
+
     login: function() {
-      $.post('/login', {
-        email: $('input[name=email]').val(),
-        password: $('input[name=password]').val()
-      }, function(data) {
+      var socketEvents = this.socketEvents;
+      $.post('/login', this.$('form').serialize(), function(data) {
+        socketEvents.trigger('app:loggedin', data);
         // after success do something
-        console.log(data);
         window.location.hash = 'index';
       }).error(function(){
         $("#error").text('Unable to login.');
