@@ -91,6 +91,7 @@ module.exports = function(config, mongoose, nodemailer) {
 
   var findById = function(accountId, callback) {
     Account.findOne({_id:accountId}, function(err, doc) {
+      console.log(doc);
       callback(doc);
     });
   };
@@ -99,15 +100,20 @@ module.exports = function(config, mongoose, nodemailer) {
     var searchRegex = new RegExp(searchStr, 'i');
     Account.find({
       $or: [
-        { 'name.full': { $regex: searchRegex } },
-        { email:       { $regex: searchRegex } }
+        { 'name.first': { $regex: searchRegex } },
+        { 'name.last':  { $regex: searchRegex } },
+        { email:        { $regex: searchRegex } }
       ]
     }, callback);
   };
 
   var addContact = function(account, addContact) {
+    console.log(addContact)
     var contact = {
-      name: addContact.name,
+      name: {
+        first: addContact.name.first,
+        last: addContact.name.last
+      },
       accountId: addContact._id,
       added: new Date(),
       updated: new Date()

@@ -13,8 +13,9 @@ function(SocialNetView, ContactView, contactsTemplate) {
 
     renderCollection: function(collection) {
       collection.each(function(contact) {
-        var statusHtml = (new ContactView({ removeButton: true, model: contact })).render().el;
-        $(statusHtml).appendTo('.contacts_list');
+        console.log(contact);
+        var contactHtml = (new ContactView({ removeButton: true, model: contact })).render().el;
+        $(contactHtml).appendTo('.contacts_list');
       });
     }
   });

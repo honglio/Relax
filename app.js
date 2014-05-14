@@ -230,6 +230,7 @@ app.post('/contacts/find', function(req, res) {
     if (err || accounts.length == 0) {
       res.send(404);
     } else {
+      console.log(accounts);
       res.send(accounts);
     }
   });

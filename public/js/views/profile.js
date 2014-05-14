@@ -19,6 +19,7 @@ function(SocialNetView,  profileTemplate,
       if ( null != statusCollection ) {
         _.each(statusCollection, function (statusJson) {
           var statusModel = new Status(statusJson);
+          console.log(statusModel);
           var statusHtml = (new StatusView({ model: statusModel })).render().el;
           $(statusHtml).prependTo('.status_list').hide().fadeIn('slow');
         });
