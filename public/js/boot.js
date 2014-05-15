@@ -1,10 +1,10 @@
 require.config({
   paths: {
-    jQuery: '/js/libs/jquery',
-    Underscore: '/js/libs/underscore',
-    Backbone: '/js/libs/backbone',
+    jQuery: '/js/vendors/jquery',
+    Underscore: '/js/vendors/underscore',
+    Backbone: '/js/vendors/backbone',
     Sockets: '/socket.io/socket.io',
-    text: '/js/libs/text',
+    text: '/js/vendors/text',
     SocialNetView: '/js/SocialNetView',
 
     // directory map

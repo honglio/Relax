@@ -1,14 +1,47 @@
 {
-    "name": "my-social-network",
+    "name": "Relax",
+    "description": "A demo app illustrating a social network",
     "version": "0.0.1",
     "private": true,
+    "author": "Hong Liu <hong.liu@live.cn> (http://honglio.com)",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/honglio/Relax.git"
+    },
+    "engines": {
+        "node": "0.10.x",
+        "npm": "1.2.x"
+    },
+    "scripts": {
+        "start": "NODE_ENV=development ./node_modules/.bin/nodemon server.js",
+        "test": "NODE_ENV=test ./node_modules/.bin/mocha --reporter spec --timeout 10000 test/test-*.js"
+    },
     "dependencies": {
-      "express": "~3.0.0",
-      "jade": ">= 0.0.1",
-      "mongoose": ">= 2.6.5",
-      "nodemailer": "0.3.20",
-      "connect": ">= 1.9.1",
-      "socket.io": "~0.9",
-      "cookie": "0.0.4"
-  }
+        "express": "3.4.x",
+        "jade": "latest",
+        "mongoose": "latest",
+        "nodemailer": "0.3.20",
+        "connect": "lastest",
+        "connect-mongo": "latest",
+        "connect-flash": "latest",
+        "socket.io": "~0.9",
+        "cookie": "0.0.4",
+        "passport": "latest",
+        "passport-local": "latest",
+        "passport-weibo": "lastest",
+        "passport-renren": "lastest",
+        "passport-qq": "lastest",
+        "passport-github": "latest",
+        "passport-linkedin": "latest",
+        "winston": "latest",
+        "notifier": "latest",
+        "async": "latest",
+        "view-helpers": "latest"
+    },
+    "devDependencies": {
+      "supertest": "latest",
+      "should": "latest",
+      "mocha": "latest",
+      "nodemon": "latest"
+    }
 }
