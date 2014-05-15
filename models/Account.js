@@ -65,7 +65,7 @@ module.exports = function(app, config, mongoose, nodemailer) {
     var shaSum = crypto.createHash('sha256');
     shaSum.update(newpassword);
     var hashedPassword = shaSum.digest('hex');
-    Account.update({_id:accountId}, {$set: {password:hashedPassword}},{upsert:false},
+    Account.update({_id:accountId}, {$set: {password:hashedPassword}}, {upsert:false},
       function changePasswordCallback(err) {
         console.log('Change password done for account ' + accountId);
     });
@@ -73,14 +73,15 @@ module.exports = function(app, config, mongoose, nodemailer) {
 
   var forgotPassword = function(email, resetPasswordUrl, callback) {
     var user = Account.findOne({email: email}, function findAccount(err, doc){
-      if (err) {
+      if (err || null==doc ) {
         // Email address is not a valid user
         callback(false);
       } else {
         var smtpTransport = nodemailer.createTransport('SMTP', config.mail);
         resetPasswordUrl += '?account=' + doc._id;
+
         smtpTransport.sendMail({
-          from: 'thisapp@example.com',
+          from: 'info@niukj.com',
           to: doc.email,
           subject: 'SocialNet Password Request',
           text: 'Click here to reset your password: ' + resetPasswordUrl

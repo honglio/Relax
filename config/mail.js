@@ -2,7 +2,7 @@
 module.exports = {
   service: "WanWang",
   host: "smtp.mxhichina.com",
-  port: 587,
+  port: 25,
   secureConnection: false,
   //name: "servername",
   auth: {
