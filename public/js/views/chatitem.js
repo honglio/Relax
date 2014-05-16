@@ -10,19 +10,20 @@ function(SocialNetView, chatItemTemplate) {
     },
 
     initialize: function(options) {
-      var accountId = this.model.get('accountId');
+      console.log(this.model);
+      var accountId = this.model.accountId;
       options.socketEvents.bind('login:' + accountId, this.handleContactLogin, this);
       options.socketEvents.bind('logout:' + accountId, this.handleContactLogout, this);
       options.socketEvents.bind('socket:chat:start:' + accountId, this.startChatSession, this);
     },
 
     handleContactLogin: function() {
-      this.model.set('online', true);
+      this.model.online = true;
       this.$el.find('.online_indicator').addClass('online');
     },
 
     handleContactLogout: function() {
-      this.model.set('online', false);
+      this.model.online = false;
       $onlineIndicator = this.$el.find('.online_indicator');
       while ( $onlineIndicator.hasClass('online') ) {
         $onlineIndicator.removeClass('online');
@@ -35,9 +36,9 @@ function(SocialNetView, chatItemTemplate) {
 
     render: function() {
       this.$el.html(_.template(chatItemTemplate, {
-        model: this.model.toJSON()
+        model: this.model
       }));
-      if ( this.model.get('online') ) this.handleContactLogin();
+      if ( this.model.online ) this.handleContactLogin();
       return this;
     }
   });

@@ -52,12 +52,14 @@ module.exports = function(app, models) {
       models.Account.findById(accountId, function subscribeToFriendFeeds(account) {
         var subscribedAccounts = {};
         sAccount = account;
-        account.contacts.forEach(function(contact) {
-          if ( !subscribedAccounts[contact.accountId] ) {
-            subscribeToAccount(contact.accountId);
-            subscribedAccounts[contact.accountId] = true;
-          }
-        });
+        if(null != account.contacts.followings) {
+          account.contacts.followings.forEach(function(contact) {
+            if ( !subscribedAccounts[contact.accountId] ) {
+              subscribeToAccount(contact.accountId);
+              subscribedAccounts[contact.accountId] = true;
+            }
+          });
+        }
 
         if (!subscribedAccounts[accountId]) {
           // Subscribe to my own updates
@@ -66,7 +68,7 @@ module.exports = function(app, models) {
       });
 
       socket.on('disconnect', function() {
-        sAccount.contacts.forEach(function(contact) {
+        sAccount.contacts.followings.forEach(function(contact) {
           var eventName = 'event:' + contact.accountId;
           app.removeEventListener(eventName, handleContactEvent);
           console.log('Unsubscribing from ' + eventName);

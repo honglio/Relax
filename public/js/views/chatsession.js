@@ -13,7 +13,7 @@ function(SocialNetView, chatItemTemplate) {
 
     initialize: function(options) {
       this.socketEvents = options.socketEvents;
-      var accountId = this.model.get('accountId');
+      var accountId = this.model.accountId;
       this.socketEvents.on('socket:chat:in:' + accountId, this.receiveChat, this);
       this.socketEvents.bind('login:' + accountId, this.handleContactLogin, this);
       this.socketEvents.bind('logout:' + accountId, this.handleContactLogout, this);
@@ -21,11 +21,11 @@ function(SocialNetView, chatItemTemplate) {
 
     handleContactLogin: function() {
       this.$el.find('.online_indicator').addClass('online');
-      this.model.set('online', true);
+      this.model.online = true;
     },
 
     handleContactLogout: function() {
-      this.model.set('online', false);
+      this.model.online = false;
       $onlineIndicator = this.$el.find('.online_indicator');
       while ( $onlineIndicator.hasClass('online') ) {
         $onlineIndicator.removeClass('online');
@@ -33,7 +33,7 @@ function(SocialNetView, chatItemTemplate) {
     },
 
     receiveChat: function(data) {
-      var chatLine = this.model.get('name').first + ': ' + data.text;
+      var chatLine = this.model.name.first + ': ' + data.text;
       this.$el.find('.chat_log').append($('<li>' + chatLine + '</li>'));
     },
 
@@ -43,7 +43,7 @@ function(SocialNetView, chatItemTemplate) {
         var chatLine = 'Me: ' + chatText;
         this.$el.find('.chat_log').append($('<li>' + chatLine + '</li>'));
         this.socketEvents.trigger('socket:chat', {
-          to: this.model.get('accountId'),
+          to: this.model.accountId,
           text: chatText
         });
       }
@@ -52,9 +52,9 @@ function(SocialNetView, chatItemTemplate) {
 
     render: function() {
       this.$el.html(_.template(chatItemTemplate, {
-        model: this.model.toJSON()
+        model: this.model
       }));
-      if ( this.model.get('online') ) this.handleContactLogin();
+      if ( this.model.online ) this.handleContactLogin();
       return this;
     }
   });

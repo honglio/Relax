@@ -75,8 +75,7 @@ module.exports = function(app, models) {
                           ? req.session.accountId
                           : req.params.id;
       models.Account.findById(accountId, function(account) {
-        if(null!=account)
-          res.send(account.contacts);
+        if(null!=account) res.send(account.contacts);
       });
   });
 
@@ -98,9 +97,9 @@ module.exports = function(app, models) {
       models.Account.findById(contactId, function(contact, err) {
         if ( !contact ) return;
 
-        models.Account.removeContact(account, contactId);
+        models.Account.removeFollowing(account, contactId);
         // Kill the reverse link
-        models.Account.removeContact(contact, accountId);
+        models.Account.removeFollower(contact, accountId);
       });
     });
 
@@ -116,8 +115,9 @@ module.exports = function(app, models) {
                        : req.params.id;
     var contactId = req.param('contactId', null);
 
-    // Missing contactId, don't bother going any further
-    if ( null == contactId ) {
+    // Missing contactId, don't bother going any further, or
+    // contactId is the same as accountId, you can't add yourself as contact.
+    if ( null == contactId || contactId === accountId ) {
       res.send(400);
       return;
     }
@@ -125,10 +125,10 @@ module.exports = function(app, models) {
     models.Account.findById(accountId, function(account) {
       if ( account ) {
         models.Account.findById(contactId, function(contact) {
-          models.Account.addContact(account, contact);
+          models.Account.addFollowing(account, contact);
 
           // Make the reverse link
-          models.Account.addContact(contact, account);
+          models.Account.addFollower(contact, account);
           account.save();
         });
       }
@@ -145,8 +145,11 @@ module.exports = function(app, models) {
                        ? req.session.accountId
                        : req.params.id;
     models.Account.findById(accountId, function(account) {
-      if ( accountId == 'me' || models.Account.hasContact(account, req.session.accountId) ) {
-        account.isFriend = true;
+      if ( models.Account.hasFollower(account, req.session.accountId) ) {
+        account.isFollower = true;
+      }
+      if ( models.Account.hasFollowing(account, req.session.accountId) ) {
+        account.isFollowing = true;
       }
       res.send(account);
     });
@@ -155,7 +158,8 @@ module.exports = function(app, models) {
   // Find contact
   app.post('/contacts/find', function(req, res) {
     var searchStr = req.param('searchStr', null);
-    if ( null == searchStr ) {
+
+    if ( null == searchStr) {
       res.send(400);
       return;
     }

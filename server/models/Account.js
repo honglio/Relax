@@ -15,7 +15,7 @@ module.exports = function(app, config, mongoose, nodemailer) {
       first:   { type: String },
       last:    { type: String }
     },
-    status:    { type: String }
+    status:    { type: String },
   });
 
   var Contact = new mongoose.Schema({
@@ -47,7 +47,10 @@ module.exports = function(app, config, mongoose, nodemailer) {
     },
     photoUrl:  { type: String },
     biography: { type: String },
-    contacts:  [Contact],
+    contacts:  {
+      followers: [Contact],
+      followings: [Contact]
+    },
     status:    [Status], // My own status updates only
     activity:  [Status]  // All status updates including friends
   });
@@ -120,8 +123,10 @@ module.exports = function(app, config, mongoose, nodemailer) {
     }, callback);
   };
 
-  var addContact = function(account, addContact) {
-    var contact = {
+  var addFollower = function(account, addContact) {
+    console.log(account);
+    console.log(addContact);
+    var follower = {
       name: {
         first: addContact.name.first,
         last: addContact.name.last
@@ -130,7 +135,7 @@ module.exports = function(app, config, mongoose, nodemailer) {
       added: new Date(),
       updated: new Date()
     };
-    account.contacts.push(contact);
+    account.contacts.followers.push(follower);
 
     account.save(function (err) {
       if (err) {
@@ -139,23 +144,65 @@ module.exports = function(app, config, mongoose, nodemailer) {
     });
   };
 
-  var removeContact = function(account, contactId) {
-    if ( null == account.contacts ) return;
+  var addFollowing = function(account, addContact) {
+    var following = {
+      name: {
+        first: addContact.name.first,
+        last: addContact.name.last
+      },
+      accountId: addContact._id,
+      added: new Date(),
+      updated: new Date()
+    };
+    account.contacts.followings.push(following);
 
-    account.contacts.forEach(function(contact) {
-      if ( contact.accountId == contactId ) {
-        account.contacts.remove(contact);
+    account.save(function (err) {
+      if (err) {
+        console.log('Error saving account: ' + err);
+      }
+    });
+  };
+
+  var removeFollower = function(account, contactId) {
+    if ( null == account.contacts.followers ) return;
+
+    account.contacts.followers.forEach(function(follower) {
+      if ( follower.accountId == contactId ) {
+        account.contacts.followers.remove(follower);
       }
     });
     account.save();
   };
 
-  // check if has contact
-  var hasContact = function(account, contactId) {
-    if ( null == account.contacts ) return false;
+  var removeFollowing = function(account, contactId) {
+    if ( null == account.contacts.followings ) return;
 
-    account.contacts.forEach(function(contact) {
-      if ( contact.accountId == contactId ) {
+    account.contacts.followings.forEach(function(following) {
+      if ( following.accountId == contactId ) {
+        account.contacts.followings.remove(following);
+      }
+    });
+    account.save();
+  };
+
+  // check if has follower
+  var hasFollower = function(account, contactId) {
+    if ( null == account.contacts.followers ) return false;
+
+    account.contacts.followers.forEach(function(follower) {
+      if ( follower.accountId == contactId ) {
+        return true;
+      }
+    });
+    return false;
+  };
+
+  // check if has following
+  var hasFollowing = function(account, contactId) {
+    if ( null == account.contacts.followings ) return false;
+
+    account.contacts.followings.forEach(function(following) {
+      if ( following.accountId == contactId ) {
         return true;
       }
     });
@@ -188,8 +235,11 @@ module.exports = function(app, config, mongoose, nodemailer) {
     changePassword: changePassword,
     login: login,
     Account: Account,
-    hasContact: hasContact,
-    addContact: addContact,
-    removeContact: removeContact
+    hasFollower: hasFollower,
+    hasFollowing: hasFollowing,
+    addFollower: addFollower,
+    addFollowing: addFollowing,
+    removeFollower: removeFollower,
+    removeFollowing: removeFollowing
   }
 }

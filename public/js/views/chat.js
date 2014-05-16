@@ -16,7 +16,7 @@ function(SocialNetView, ChatSessionView, ChatItemView, chatItemTemplate) {
     },
 
     startChatSession: function(model) {
-      var accountId = model.get('accountId');
+      var accountId = model.accountId;
       if ( !this.chatSessions[accountId]) {
         var chatSessionView = new ChatSessionView({
           model:model,
@@ -30,7 +30,7 @@ function(SocialNetView, ChatSessionView, ChatItemView, chatItemTemplate) {
     renderCollection: function(collection) {
       var that = this;
       $('.chat_list').empty();
-      collection.each(function(contact) {
+      collection.models[0].attributes.followings.forEach(function(contact) {
         var chatItemView = new ChatItemView({ socketEvents: that.socketEvents, model: contact });
         chatItemView.bind('chat:start', that.startChatSession, that);
         var statusHtml = (chatItemView).render().el;
