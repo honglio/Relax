@@ -15,7 +15,7 @@ module.exports = function(app, config, mongoose, nodemailer) {
       first:   { type: String },
       last:    { type: String }
     },
-    status:    { type: String },
+    status:    { type: String }
   });
 
   var Contact = new mongoose.Schema({
@@ -52,7 +52,8 @@ module.exports = function(app, config, mongoose, nodemailer) {
       followings: [Contact]
     },
     status:    [Status], // My own status updates only
-    activity:  [Status]  // All status updates including friends
+    activity:  [Status], // All status updates including friends
+    viewNum:   { type: Number, default: 0 }
   });
 
   var Account = mongoose.model('Account', AccountSchema);

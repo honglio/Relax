@@ -29,6 +29,33 @@ module.exports = function(app, models) {
 
   });
 
+  app.get('/accounts/:id/viewNum', function(req, res) {
+      var accountId = req.params.id == 'me'
+                          ? req.session.accountId
+                          : req.params.id;
+      console.log(accountId);
+      models.Account.findById(accountId, function(account) {
+        if (null!=account) {
+          console.log(account.viewNum);
+          res.send({data: account.viewNum});
+        }
+      });
+  });
+
+  app.post('/accounts/:id/viewNum', function(req, res) {
+    var accountId = req.params.id == 'me'
+                       ? req.session.accountId
+                       : req.params.id;
+    models.Account.findById(accountId, function(account) {
+      if (null!=account) {
+        account.viewNum += 1;
+        account.save();
+      }
+    });
+
+    res.send(200);
+  });
+
   app.get('/accounts/:id/status', function(req, res) {
       var accountId = req.params.id == 'me'
                           ? req.session.accountId
@@ -137,6 +164,27 @@ module.exports = function(app, models) {
     // Note: Not in callback - this endpoint returns immediately and
     // processes in the background
     res.send(200);
+  });
+
+  // viewNum plus 1
+  app.post('/accounts/:id/viewNum', function(req, res) {
+    /*optional stuff to do after success */
+    var accountId = req.params.id == 'me'
+                      ? req.session.accountId
+                      : req.params.id;
+    var viewNum = req.param('viewNum', null);
+
+    if( null == viewNum ) {
+      res.send(400);
+      return;
+    }
+
+    models.Account.findById(accountId, function(account) {
+      if ( account ) {
+        account.viewNum += 1;
+        account.save();
+      }
+    });
   });
 
   // check friend
