@@ -51,6 +51,7 @@ function(SocialNetView, chatItemTemplate) {
     },
 
     render: function() {
+      console.log(this.model);
       this.$el.html(_.template(chatItemTemplate, {
         model: this.model
       }));

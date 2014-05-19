@@ -1,7 +1,8 @@
 var express = require('express');
+var mongoose = require('mongoose');
 var MemoryStore = require('connect').session.MemoryStore;
 
-module.exports = function (app, config, mongoose, passport) {
+module.exports = function (app, config, passport) {
     // Create a session store to share between methods
     app.sessionStore = new MemoryStore();
 

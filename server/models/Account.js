@@ -1,4 +1,6 @@
-module.exports = function(app, config, mongoose, nodemailer) {
+var mongoose = require('mongoose');
+
+module.exports = function(app, config, nodemailer) {
   var crypto = require('crypto');
 
   var schemaOptions = {
@@ -13,7 +15,8 @@ module.exports = function(app, config, mongoose, nodemailer) {
   var Status = new mongoose.Schema({
     name: {
       first:   { type: String },
-      last:    { type: String }
+      last:    { type: String },
+      full:    { type: String }
     },
     status:    { type: String }
   });
@@ -21,7 +24,8 @@ module.exports = function(app, config, mongoose, nodemailer) {
   var Contact = new mongoose.Schema({
     name: {
       first:   { type: String },
-      last:    { type: String }
+      last:    { type: String },
+      full:    { type: String }
     },
     accountId: { type: mongoose.Schema.ObjectId },
     added:     { type: Date },     // When the contact was added
@@ -130,7 +134,8 @@ module.exports = function(app, config, mongoose, nodemailer) {
     var follower = {
       name: {
         first: addContact.name.first,
-        last: addContact.name.last
+        last: addContact.name.last,
+        full: addContact.name.full
       },
       accountId: addContact._id,
       added: new Date(),
@@ -149,7 +154,8 @@ module.exports = function(app, config, mongoose, nodemailer) {
     var following = {
       name: {
         first: addContact.name.first,
-        last: addContact.name.last
+        last: addContact.name.last,
+        full: addContact.name.full
       },
       accountId: addContact._id,
       added: new Date(),
