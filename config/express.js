@@ -9,9 +9,9 @@ module.exports = function (app, config, passport) {
     app.configure(function(){
         app.sessionSecret = 'SocialNet secret key';
         app.use(express.limit('2mb'));
-        app.use(express.static(config.path.root + '/public'));
+        app.use(express.static(config.root + '/public'));
         // set backend views path, template engine and default layout
-        app.set('views', config.path.root + '/server/views');
+        app.set('views', config.root + '/server/views');
         app.set('view engine', 'jade');
         // cookieParser should be above session
         app.use(express.cookieParser());
@@ -26,7 +26,7 @@ module.exports = function (app, config, passport) {
             store: app.sessionStore
         }));
 
-        mongoose.connect(config.path.db, function onMongooseError (err) {
+        mongoose.connect(config.db, function onMongooseError (err) {
             if (err) throw err;
         });
     });

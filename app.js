@@ -1,47 +1,28 @@
 var express     = require("express");
-var http        = require('http');
-var nodemailer  = require('nodemailer');
 var fs          = require('fs');
-var events      = require('events');
 var app         = express();
-
-// Create an http server
-app.server      = http.createServer(app);
-
-// Create an event dispatcher
-var eventDispatcher = new events.EventEmitter();
-app.addEventListener = function ( eventName, callback ) {
-  eventDispatcher.on(eventName, callback);
-};
-app.removeEventListener = function ( eventName, callback ) {
-  eventDispatcher.removeListener( eventName, callback );
-};
-app.triggerEvent = function( eventName, eventOptions ) {
-  eventDispatcher.emit( eventName, eventOptions );
-};
-
-// Import the data layer
-var config = {
-  mail: require('./config/mail'),
-  path: require('./config/path')
-};
-
-// express settings
-require('./config/express')(app, config);
+var passport    = require('passport');
+var config      = require('./config/config');
 
 // Import accounts to models
-var models = {
-  Account: require('./server/models/Account')(app, config, nodemailer)
-};
-
-// Import the routes
-var routes_path = './server/controllers';
-fs.readdirSync(routes_path).forEach(function (file) {
+var models_path = __dirname + '/server/models'
+fs.readdirSync(models_path).forEach(function (file) {
   if ( file[0] == '.' ) return;
-  // var routeName = file.substr(0, file.indexOf('.'));
-  if (~file.indexOf('.js'))
-    require(routes_path + '/' + file)(app, models);
-});
+  if (~file.indexOf('.js')) require(models_path + '/' + file)
+})
 
-app.server.listen(8080);
+// passport settings
+require('./config/passport')(passport, config);
+
+// express settings
+require('./config/express')(app, config, passport);
+
+// Import the routes and controllers
+var routes_path = __dirname + '/server/controllers';
+require(routes_path + '/' + 'api')(app);
+
+app.listen(8080);
 console.log("SocialNet is listening to port 8080.");
+
+// expose app
+exports = module.exports = app;

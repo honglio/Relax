@@ -8,8 +8,6 @@ function(IndexView, RegisterView, LoginView, ForgotPasswordView, ProfileView,
   var SocialRouter = Backbone.Router.extend({
     currentView: null,
 
-    socketEvents: _.extend({}, Backbone.Events),
-
     routes: {
       "addcontact": "addcontact",
       "index": "index",
@@ -29,13 +27,7 @@ function(IndexView, RegisterView, LoginView, ForgotPasswordView, ProfileView,
     },
 
     index: function() {
-      var statusCollection = new StatusCollection();
-      statusCollection.url = '/accounts/me/activity';
-      this.changeView(new IndexView({
-        collection: statusCollection,
-        socketEvents: this.socketEvents
-      }));
-      statusCollection.fetch();
+      this.changeView(new IndexView());
     },
 
     addcontact: function() {
@@ -43,7 +35,7 @@ function(IndexView, RegisterView, LoginView, ForgotPasswordView, ProfileView,
     },
 
     login: function() {
-      this.changeView(new LoginView({ socketEvents:this.socketEvents }));
+      this.changeView(new LoginView());
     },
 
     forgotpassword: function() {
@@ -54,20 +46,33 @@ function(IndexView, RegisterView, LoginView, ForgotPasswordView, ProfileView,
       this.changeView(new RegisterView());
     },
 
-    profile: function(id) {
-      var model = new Account({id:id});
-      this.changeView(new ProfileView({model:model, socketEvents:this.socketEvents}));
-      model.fetch();
+    profile: function() {
+      var statusCollection = new StatusCollection();
+      statusCollection.url = '/accounts/me/status';
+      var that = this;
+      statusCollection.fetch({
+        success: function(collection) {
+          that.changeView(new ProfileView({collection: collection}));
+        },
+        error: function() {
+            alert('An error occurred while fetch profile');
+        }
+      });
     },
 
     contacts: function(id) {
       var contactId = id ? id : 'me';
       var contactsCollection = new ContactCollection();
       contactsCollection.url = '/accounts/' + contactId + '/contacts';
-      this.changeView(new ContactsView({
-        collection: contactsCollection
-      }));
-      contactsCollection.fetch();
+      var that = this;
+      contactsCollection.fetch({
+        success: function(collection) {
+          that.changeView(new ContactsView({collection: collection}));
+        },
+        error: function() {
+          alert('An error occurred while fetch contact');
+        }
+      });
     }
   });
 

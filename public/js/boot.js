@@ -3,7 +3,6 @@ require.config({
     jQuery: '/js/vendors/jquery',
     Underscore: '/js/vendors/underscore',
     Backbone: '/js/vendors/backbone',
-    Sockets: '/socket.io/socket.io',
     text: '/js/vendors/text',
     SocialNetView: '/js/SocialNetView',
 

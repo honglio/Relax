@@ -10,46 +10,37 @@ function(SocialNetView,  profileTemplate,
       "submit form": "postStatus"
     },
 
-    initialize: function (options) {
-      this.socketEvents = options.socketEvents;
-      this.model.bind('change', this.render, this);
+    initialize: function () {
+      this.collection.on('add', this.onStatusAdded, this);
+    },
+
+    onStatusRender: function(collection) {
+        var that = this;
+        collection.each(function(model) {
+            that.onStatusAdded(model);
+        });
+    },
+
+    onStatusAdded: function(status) {
+        var statusHtml = (new StatusView({ model: status })).render().el;
+        $(statusHtml).prependTo('.status_list').hide().fadeIn('slow');
     },
 
     postStatus: function() {
-      var that = this;
-      var statusText = $('input[name=status').val();
+      var statusText = $('input[name=status]').val();
       var statusCollection = this.collection;
-      $.post('/accounts/' + this.model.get('_id') + '/status', { status: statusText });
+      $.post('/accounts/me/status',
+      { status: statusText },
+      function(data) {
+          /*optional stuff to do after success */
+          statusCollection.add(new Status({status:statusText}));
+      });
       return false;
     },
 
-    prependStatus: function(statusModel) {
-      var statusHtml = (new StatusView({ model: statusModel })).render().el;
-      $(statusHtml).prependTo('.status_list').hide().fadeIn('slow');
-    },
-
-    onSocketStatusAdded: function(data) {
-      var statusText = data.data;
-      var statusModel = new Status({status:statusText.status, name:statusText.name});
-      this.prependStatus(statusModel);
-    },
-
     render: function() {
-      if ( this.model.get('_id') ) {
-        this.socketEvents.bind('status:' + this.model.get('_id'), this.onSocketStatusAdded, this);
-      }
-      var that = this;
-      this.$el.html(
-        _.template(profileTemplate, this.model.toJSON())
-      );
-
-      var statusCollection = this.model.get('status');
-      if ( null != statusCollection ) {
-        _.each(statusCollection, function (statusJson) {
-          var statusModel = new Status(statusJson);
-          that.prependStatus(statusModel);
-        });
-      }
+      this.$el.html( _.template(profileTemplate, this.collection.models[0].attributes) );
+      this.onStatusRender(this.collection);
     }
   });
 

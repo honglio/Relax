@@ -1,223 +1,83 @@
-/*
- * Routes Example
- *
- * Name       Method    Path
- * ---------------------------------------------
- * Index      GET     /restaurants
- * Show       GET     /restaurants/:id
- * New        GET     /restaurants/new
- * Create     POST    /restaurants
- * Edit       GET     /restaurants/edit
- * Update       PUT     /restaurants/:id
- * Delete       GET     /restaurants/delete
- * Destroy      DELETE    /restaurants/:id
- * Search     GET     /restaurants/search?<query>
- * Showcodes    GET     /restaurants/:id/codes
- * Generatecodes  GET     /restaurants/:id/generate?n=<number>
- */
+var mongoose = require('mongoose');
+var Account = mongoose.model('Account');
+var nodemailer  = require('nodemailer');
+var crypto = require('crypto');
+var config = require('../../config/config');
 
-module.exports = function(app, models) {
-  app.get('/accounts/:id/activity', function(req, res) {
-      var accountId = req.params.id == 'me'
-                          ? req.session.accountId
-                          : req.params.id;
-      models.Account.findById(accountId, function(account) {
-        if (null!=account) {
-          res.send(account.activity);
+exports.findById = function(accountId, callback) {
+  Account.findOne({_id:accountId}, function(err, doc) {
+    callback(doc);
+  });
+};
+
+exports.findByString = function(searchStr, callback) {
+  var searchRegex = new RegExp(searchStr, 'i');
+  Account.find({
+    $or: [
+      { 'name.full':  { $regex: searchRegex } },
+      { email:        { $regex: searchRegex } }
+    ]
+  }, callback);
+};
+
+exports.register = function(email, password, firstName, lastName) {
+  var shaSum = crypto.createHash('sha256');
+  shaSum.update(password);
+
+  console.log('Registering ' + email);
+  var user = new Account({
+    email: email,
+    name: {
+      first: firstName,
+      last: lastName,
+      full: firstName + ' ' + lastName
+    },
+    password: shaSum.digest('hex')
+  });
+  user.save();
+  console.log('Save command was sent');
+};
+
+exports.changePassword = function(accountId, newpassword) {
+  var shaSum = crypto.createHash('sha256');
+  shaSum.update(newpassword);
+  var hashedPassword = shaSum.digest('hex');
+  Account.update({_id:accountId}, {$set: {password:hashedPassword}}, {upsert:false},
+    function changePasswordCallback(err) {
+      console.log('Change password done for account ' + accountId);
+  });
+};
+
+exports.forgotPassword = function(email, resetPasswordUrl, callback) {
+  var user = Account.findOne({email: email}, function findAccount(err, doc){
+    if (err || null==doc ) {
+      // Email address is not a valid user
+      callback(false);
+    } else {
+      var smtpTransport = nodemailer.createTransport('SMTP', config.mail);
+      resetPasswordUrl += '?account=' + doc._id;
+
+      smtpTransport.sendMail({
+        from: 'info@niukj.com',
+        to: doc.email,
+        subject: 'SocialNet Password Request',
+        text: 'Click here to reset your password: ' + resetPasswordUrl
+      }, function forgotPasswordResult(err) {
+        if (err) {
+          callback(false);
+        } else {
+          callback(true);
         }
       });
-
-  });
-
-  app.get('/accounts/:id/viewNum', function(req, res) {
-      var accountId = req.params.id == 'me'
-                          ? req.session.accountId
-                          : req.params.id;
-      console.log(accountId);
-      models.Account.findById(accountId, function(account) {
-        if (null!=account) {
-          console.log(account.viewNum);
-          res.send({data: account.viewNum});
-        }
-      });
-  });
-
-  app.post('/accounts/:id/viewNum', function(req, res) {
-    var accountId = req.params.id == 'me'
-                       ? req.session.accountId
-                       : req.params.id;
-    models.Account.findById(accountId, function(account) {
-      if (null!=account) {
-        account.viewNum += 1;
-        account.save();
-      }
-    });
-
-    res.send(200);
-  });
-
-  app.get('/accounts/:id/status', function(req, res) {
-      var accountId = req.params.id == 'me'
-                          ? req.session.accountId
-                          : req.params.id;
-      models.Account.findById(accountId, function(account) {
-        if (null!=account) {
-          res.send(account.status);
-        }
-      });
-  });
-
-  app.post('/accounts/:id/status', function(req, res) {
-      var accountId = req.params.id == 'me'
-                          ? req.session.accountId
-                          : req.params.id;
-      models.Account.findById(accountId, function(account) {
-        if (null!=account) {
-          var status = {
-              name: account.name,
-              status: req.param('contactId', '')
-          };
-          account.status.push(status);
-
-          // Push the status to all friends
-          account.activity.push(status);
-          account.save(function (err) {
-            if (err) {
-                console.log('Error saving account: ' + err);
-            } else {
-              app.triggerEvent('event:' + accountId, {
-                from: accountId,
-                data: status,
-                action: 'status'
-              });
-            }
-          });
-        }
-      });
-      res.send(200);
-  });
-
-  app.get('/accounts/:id/contacts', function(req, res) {
-      var accountId = req.params.id == 'me'
-                          ? req.session.accountId
-                          : req.params.id;
-      models.Account.findById(accountId, function(account) {
-        if(null!=account) res.send(account.contacts);
-      });
-  });
-
-  // remove contact
-  app.delete('/accounts/:id/contact', function(req, res) {
-    var accountId = req.params.id == 'me'
-                       ? req.session.accountId
-                       : req.params.id;
-    var contactId = req.param('contactId', null);
-
-    // Missing contactId, don't bother going any further
-    if ( null == contactId ) {
-      res.send(400);
-      return;
     }
-
-    models.Account.findById(accountId, function(account) {
-      if ( !account ) return;
-      models.Account.findById(contactId, function(contact, err) {
-        if ( !contact ) return;
-
-        models.Account.removeFollowing(account, contactId);
-        // Kill the reverse link
-        models.Account.removeFollower(contact, accountId);
-      });
-    });
-
-    // Note: Not in callback - this endpoint returns immediately and
-    // processes in the background
-    res.send(200);
   });
+};
 
-  // Add contact
-  app.post('/accounts/:id/contact', function(req, res) {
-    var accountId = req.params.id == 'me'
-                       ? req.session.accountId
-                       : req.params.id;
-    var contactId = req.param('contactId', null);
+exports.login = function(email, password, callback) {
+  var shaSum = crypto.createHash('sha256');
+  shaSum.update(password);
 
-    // Missing contactId, don't bother going any further, or
-    // contactId is the same as accountId, you can't add yourself as contact.
-    if ( null == contactId || contactId === accountId ) {
-      res.send(400);
-      return;
-    }
-
-    models.Account.findById(accountId, function(account) {
-      if ( account ) {
-        models.Account.findById(contactId, function(contact) {
-          models.Account.addFollowing(account, contact);
-
-          // Make the reverse link
-          models.Account.addFollower(contact, account);
-          account.save();
-        });
-      }
-    });
-
-    // Note: Not in callback - this endpoint returns immediately and
-    // processes in the background
-    res.send(200);
+  Account.findOne({email:email,password:shaSum.digest('hex')},function(err,doc){
+    callback(doc);
   });
-
-  // viewNum plus 1
-  app.post('/accounts/:id/viewNum', function(req, res) {
-    /*optional stuff to do after success */
-    var accountId = req.params.id == 'me'
-                      ? req.session.accountId
-                      : req.params.id;
-    var viewNum = req.param('viewNum', null);
-
-    if( null == viewNum ) {
-      res.send(400);
-      return;
-    }
-
-    models.Account.findById(accountId, function(account) {
-      if ( account ) {
-        account.viewNum += 1;
-        account.save();
-      }
-    });
-  });
-
-  // check friend
-  app.get('/accounts/:id', function(req, res) {
-    var accountId = req.params.id == 'me'
-                       ? req.session.accountId
-                       : req.params.id;
-    models.Account.findById(accountId, function(account) {
-      if ( models.Account.hasFollower(account, req.session.accountId) ) {
-        account.isFollower = true;
-      }
-      if ( models.Account.hasFollowing(account, req.session.accountId) ) {
-        account.isFollowing = true;
-      }
-      res.send(account);
-    });
-  });
-
-  // Find contact
-  app.post('/contacts/find', function(req, res) {
-    var searchStr = req.param('searchStr', null);
-
-    if ( null == searchStr) {
-      res.send(400);
-      return;
-    }
-
-    models.Account.findByString(searchStr, function onSearchDone(err, accounts) {
-      if (err || accounts.length == 0) {
-        res.send(404);
-      } else {
-        res.send(accounts);
-      }
-    });
-  });
-}
+};
