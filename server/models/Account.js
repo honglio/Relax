@@ -1,4 +1,6 @@
 var mongoose = require('mongoose');
+var bcrypt = require('bcrypt-nodejs');
+var crypto = require('crypto');
 
 var Status = new mongoose.Schema({
   name: {
@@ -21,27 +23,62 @@ var Contact = new mongoose.Schema({
 });
 
 var AccountSchema = new mongoose.Schema({
-  email:     { type: String, unique: true },
+  email:     { type: String, unique: true, lowercase: true },
   password:  { type: String },
-  name: {
-    first:   { type: String },
-    last:    { type: String },
-    full:    { type: String }
+
+  resetPasswordToken: { type: String },
+  resetPasswordExpires: { type: Date },
+
+  weibo: { type: String },
+  renren: { type: String },
+  qq: { type: String },
+  github: { type: String },
+  linkedin: { type: String },
+  tokens: { type: Array },
+
+  profile: {
+    name: {
+      first:   { type: String },
+      last:    { type: String },
+      full:    { type: String }
+    },
+    birthday: {
+      day:     { type: Number, min: 1, max: 31, required: false },
+      month:   { type: Number, min: 1, max: 12, required: false },
+      year:    { type: Number }
+    },
+    gender: { type: String, default: '' },
+    location: { type: String, default: '' },
+    website: { type: String, default: '' },
+    photoUrl:  { type: String, default: '' },
+    biography: { type: String, default: '' }
   },
-  birthday: {
-    day:     { type: Number, min: 1, max: 31, required: false },
-    month:   { type: Number, min: 1, max: 12, required: false },
-    year:    { type: Number }
-  },
-  photoUrl:  { type: String },
-  biography: { type: String },
   contacts:  {
     followers: [Contact],
     followings: [Contact]
   },
   status:    [Status], // My own status updates only
-  activity:  [Status], // All status updates including friends
   viewNum:   { type: Number, default: 0 }
+});
+
+/**
+ * Hash the password for security.
+ * "Pre" is a Mongoose middleware that executes before each user.save() call.
+ */
+AccountSchema.pre('save', function(next) {
+  var account = this;
+
+  if (!account.isModified('password')) return next();
+
+  bcrypt.genSalt(5, function(err, salt) {
+    if (err) return next(err);
+
+    bcrypt.hash(account.password, salt, null, function(err, hash) {
+      if (err) return next(err);
+      account.password = hash;
+      next();
+    });
+  });
 });
 
 AccountSchema.statics = {
@@ -131,6 +168,35 @@ AccountSchema.statics = {
       }
     });
     return false;
+  }
+};
+
+AccountSchema.methods = {
+  /**
+   * Validate user's password.
+   * Used by Passport-Local Strategy for password validation.
+   */
+  comparePassword: function(candidatePassword, cb) {
+    bcrypt.compare(candidatePassword, this.password, function(err, isMatch) {
+      if (err) return cb(err);
+      cb(null, isMatch);
+    });
+  },
+
+  /**
+   * Get URL to a user's gravatar.
+   * Used in Navbar and Account Management page.
+   */
+
+  gravatar: function(size) {
+    if (!size) size = 200;
+
+    if (!this.email) {
+      return 'https://gravatar.com/avatar/?s=' + size + '&d=retro';
+    }
+
+    var md5 = crypto.createHash('md5').update(this.email).digest('hex');
+    return 'https://gravatar.com/avatar/' + md5 + '?s=' + size + '&d=retro';
   }
 };
 

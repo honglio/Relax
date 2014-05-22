@@ -1,9 +1,9 @@
 var path = require('path');
 
 module.exports = {
-    db: 'mongodb://localhost/nodebackbone',
+    db: process.env.MONGODB || 'mongodb://localhost/relax',
     root: path.normalize(__dirname + '/..'),
-
+    sessionSecret: process.env.SESSION_SECRET || 'Relax',
     // Copy in your particulars and rename this to mail.js
     mail: {
       service: "WanWang",

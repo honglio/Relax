@@ -1,181 +1,289 @@
-var mongoose = require('mongoose')
+var _ = require('underscore')
+  , passport = require('passport')
+  , mongoose = require('mongoose')
+  , User = mongoose.model('Account')
   , LocalStrategy = require('passport-local').Strategy
-  , TwitterStrategy = require('passport-renren').Strategy
-  , FacebookStrategy = require('passport-weibo').Strategy
+  , RenrenStrategy = require('passport-renren').Strategy
+  , WeiboStrategy = require('passport-weibo').Strategy
   , GitHubStrategy = require('passport-github').Strategy
-  , GoogleStrategy = require('passport-qq').Strategy
-  , LinkedinStrategy = require('passport-linkedin').Strategy
-  , User = mongoose.model('Account');
+  , QQStrategy = require('passport-qq').Strategy
+  , LinkedInStrategy = require('passport-linkedin-oauth2').Strategy
+  , config = require('./config');
 
+// serialize sessions
+passport.serializeUser(function(user, done) {
+  done(null, user.id)
+})
 
-module.exports = function (passport, config) {
-  // require('./initializer')
-
-  // serialize sessions
-  passport.serializeUser(function(user, done) {
-    done(null, user.id)
+passport.deserializeUser(function(id, done) {
+  User.findById(id, function (err, user) {
+    done(err, user)
   })
+})
 
-  passport.deserializeUser(function(id, done) {
-    User.findOne({ _id: id }, function (err, user) {
-      done(err, user)
+// login use local strategy
+passport.use(new LocalStrategy({
+    usernameField: 'email',
+    passwordField: 'password'
+  },
+  function(email, password, done) {
+    User.findOne({ email: email }, function (err, user) {
+      if (err) { return done(err) }
+      if (!user) {
+        return done(null, false, { message: 'Email ' + email + ' not found'})
+      }
+      user.comparePassword(password, function(err, isMatch) {
+        if (isMatch) {
+          return done(null, user);
+        } else {
+          return done(null, false, { message: 'Invalid email or password.' });
+        }
+      });
+    });
+  }
+));
+
+// use Renren strategy
+passport.use(new RenrenStrategy(config.renren,
+  function(req, accesstoken, tokenSecret, profile, done) {
+  if (req.user) {
+    User.findOne({ renren: profile.id }, function (err, existingUser) {
+      if (existingUser) {
+        req.flash('errors', { msg: 'There is already a Renren account that belongs to you. Sign in with that account or delete it, then link it with your current account.' });
+        done(err);
+      } else {
+        User.findById(req.user.id, function(err, user) {
+          user.renren = profile.id;
+          user.tokens.push({ kind: 'renren', accessToken: accessToken, tokenSecret: tokenSecret });
+          user.profile.name = user.profile.name || profile.displayName;
+          user.profile.location = user.profile.location || profile._json.location;
+          user.profile.picture = user.profile.picture || profile._json.profile_image_url;
+          user.profile.website = user.profile.website || profile._json.publicProfileUrl;
+          user.save(function(err) {
+            req.flash('info', { msg: 'Renren account has been linked.' });
+            done(err, user);
+          });
+        });
+      }
     })
-  })
+  } else {
+    User.findOne({ renren: profile.id }, function(err, existingUser) {
+      if (existingUser) return done(null, existingUser);
+      var user = new User();
+      // Twitter will not provide an email address.  Period.
+      // But a person’s twitter username is guaranteed to be unique
+      // so we can "fake" a twitter email address as follows:
+      user.email = profile.username + "@renren.com";
+      user.renren = profile.id;
+      user.tokens.push({ kind: 'renren', accessToken: accessToken, tokenSecret: tokenSecret });
+      user.profile.name = profile.displayName;
+      user.profile.location = profile._json.location;
+      user.profile.picture = profile._json.profile_image_url;
+      user.profile.website = profile._json.publicProfileUrl;
+      user.save(function(err) {
+        done(err, user);
+      });
+    });
+  }
+}));
 
-  // use local strategy
-  passport.use(new LocalStrategy({
-      usernameField: 'email',
-      passwordField: 'password'
-    },
-    function(email, password, done) {
-      User.findOne({ email: email }, function (err, user) {
-        if (err) { return done(err) }
-        if (!user) {
-          return done(null, false, { message: 'Unknown user' })
-        }
-        if (!user.authenticate(password)) {
-          return done(null, false, { message: 'Invalid password' })
-        }
-        return done(null, user)
-      })
-    }
-  ))
+// use weibo strategy
+passport.use(new WeiboStrategy(config.weibo,
+  function(req, accesstoken, tokenSecret, profile, done) {
+  if (req.user) {
+    User.findOne({ weibo: profile.id }, function (err, existingUser) {
+      if (existingUser) {
+        req.flash('errors', { msg: 'There is already a Weibo account that belongs to you. Sign in with that account or delete it, then link it with your current account.' });
+        done(err);
+      } else {
+        User.findById(req.user.id, function(err, user) {
+          user.renren = profile.id;
+          user.tokens.push({ kind: 'weibo', accessToken: accessToken, tokenSecret: tokenSecret });
+          user.profile.name = user.profile.name || profile.displayName;
+          user.profile.location = user.profile.location || profile._json.location;
+          user.profile.picture = user.profile.picture || profile._json.profile_image_url;
+          user.profile.website = user.profile.website || profile._json.publicProfileUrl;
+          user.save(function(err) {
+            req.flash('info', { msg: 'Weibo account has been linked.' });
+            done(err, user);
+          });
+        });
+      }
+    })
+  } else {
+    User.findOne({ weibo: profile.id }, function(err, existingUser) {
+      if (existingUser) return done(null, existingUser);
+      var user = new User();
+      user.email = profile._json.email;
+      user.weibo = profile.id;
+      user.tokens.push({ kind: 'weibo', accessToken: accessToken, tokenSecret: tokenSecret });
+      user.profile.name = profile.displayName;
+      user.profile.location = profile._json.location;
+      user.profile.picture = profile._json.profile_image_url;
+      user.profile.website = profile._json.publicProfileUrl;
+      user.save(function(err) {
+        done(err, user);
+      });
+    });
+  }
+}));
 
-  // use twitter strategy
-  passport.use(new TwitterStrategy({
-      clientID: config.renren.clientID,
-      clientSecret: config.renren.clientSecret,
-      callbackURL: config.renren.callbackURL
-    },
-    function(token, tokenSecret, profile, done) {
-      User.findOne({ 'renren.id_str': profile.id }, function (err, user) {
-        if (err) { return done(err) }
-        if (!user) {
-          user = new User({
-            name: profile.displayName,
-            username: profile.username,
-            provider: 'renren',
-            renren: profile._json
-          })
-          user.save(function (err) {
-            if (err) console.log(err)
-            return done(err, user)
-          })
-        }
-        else {
-          return done(err, user)
-        }
-      })
-    }
-  ))
-
-  // use facebook strategy
-  passport.use(new FacebookStrategy({
-      clientID: config.weibo.clientID,
-      clientSecret: config.weibo.clientSecret,
-      callbackURL: config.weibo.callbackURL
-    },
-    function(accessToken, refreshToken, profile, done) {
-      User.findOne({ 'weibo.id': profile.id }, function (err, user) {
-        if (err) { return done(err) }
-        if (!user) {
-          user = new User({
-            name: profile.displayName,
-            email: profile.emails[0].value,
-            username: profile.username,
-            provider: 'weibo',
-            weibo: profile._json
-          })
-          user.save(function (err) {
-            if (err) console.log(err)
-            return done(err, user)
-          })
-        }
-        else {
-          return done(err, user)
-        }
-      })
-    }
-  ))
-
-  // use github strategy
-  passport.use(new GitHubStrategy({
-      clientID: config.github.clientID,
-      clientSecret: config.github.clientSecret,
-      callbackURL: config.github.callbackURL
-    },
-    function(accessToken, refreshToken, profile, done) {
-      User.findOne({ 'github.id': profile.id }, function (err, user) {
-        if (!user) {
-          user = new User({
-            name: profile.displayName,
-            email: profile.emails[0].value,
-            username: profile.username,
-            provider: 'github',
-            github: profile._json
-          })
-          user.save(function (err) {
-            if (err) console.log(err)
-            return done(err, user)
-          })
+// use github strategy
+passport.use(new GitHubStrategy(config.github, function(req, accessToken, refreshToken, profile, done) {
+  if (req.user) {
+    User.findOne({ github: profile.id }, function(err, existingUser) {
+      if (existingUser) {
+        req.flash('errors', { msg: 'There is already a GitHub account that belongs to you. Sign in with that account or delete it, then link it with your current account.' });
+        done(err);
+      } else {
+        User.findById(req.user.id, function(err, user) {
+          user.github = profile.id;
+          user.tokens.push({ kind: 'github', accessToken: accessToken });
+          user.profile.name = user.profile.name || profile.displayName;
+          user.profile.picture = user.profile.picture || profile._json.avatar_url;
+          user.profile.location = user.profile.location || profile._json.location;
+          user.profile.website = user.profile.website || profile._json.blog;
+          user.save(function(err) {
+            req.flash('info', { msg: 'GitHub account has been linked.' });
+            done(err, user);
+          });
+        });
+      }
+    });
+  } else {
+    User.findOne({ github: profile.id }, function(err, existingUser) {
+      if (existingUser) return done(null, existingUser);
+      User.findOne({ email: profile._json.email }, function(err, existingEmailUser) {
+        if (existingEmailUser) {
+          req.flash('errors', { msg: 'There is already an account using this email address. Sign in to that account and link it with GitHub manually from Account Settings.' });
+          done(err);
         } else {
-          return done(err, user)
+          var user = new User();
+          user.email = profile._json.email;
+          user.github = profile.id;
+          user.tokens.push({ kind: 'github', accessToken: accessToken });
+          user.profile.name = profile.displayName;
+          user.profile.picture = profile._json.avatar_url;
+          user.profile.location = profile._json.location;
+          user.profile.website = profile._json.blog;
+          user.save(function(err) {
+            done(err, user);
+          });
         }
-      })
-    }
-  ))
+      });
+    });
+  }
+}));
 
-  // use google strategy
-  passport.use(new GoogleStrategy({
-      clientID: config.qq.clientID,
-      clientSecret: config.qq.clientSecret,
-      callbackURL: config.qq.callbackURL
-    },
-    function(accessToken, refreshToken, profile, done) {
-      User.findOne({ 'qq.id': profile.id }, function (err, user) {
-        if (!user) {
-          user = new User({
-            name: profile.displayName,
-            email: profile.emails[0].value,
-            username: profile.username,
-            provider: 'qq',
-            qq: profile._json
-          })
-          user.save(function (err) {
-            if (err) console.log(err)
-            return done(err, user)
-          })
+// use QQ strategy
+passport.use(new QQStrategy(config.qq, function(req, accessToken, refreshToken, profile, done) {
+  if (req.user) {
+    User.findOne({ qq: profile.id }, function(err, existingUser) {
+      if (existingUser) {
+        req.flash('errors', { msg: 'There is already a QQ account that belongs to you. Sign in with that account or delete it, then link it with your current account.' });
+        done(err);
+      } else {
+        User.findById(req.user.id, function(err, user) {
+          user.qq = profile.id;
+          user.tokens.push({ kind: 'qq', accessToken: accessToken });
+          user.profile.name = user.profile.name || profile.displayName;
+          user.profile.picture = user.profile.picture || profile._json.avatar_url;
+          user.profile.location = user.profile.location || profile._json.location;
+          user.profile.website = user.profile.website || profile._json.blog;
+          user.save(function(err) {
+            req.flash('info', { msg: 'QQ account has been linked.' });
+            done(err, user);
+          });
+        });
+      }
+    });
+  } else {
+    User.findOne({ qq: profile.id }, function(err, existingUser) {
+      if (existingUser) return done(null, existingUser);
+      User.findOne({ email: profile._json.email }, function(err, existingEmailUser) {
+        if (existingEmailUser) {
+          req.flash('errors', { msg: 'There is already an account using this email address. Sign in to that account and link it with QQ manually from Account Settings.' });
+          done(err);
         } else {
-          return done(err, user)
+          var user = new User();
+          user.email = profile._json.email;
+          user.qq = profile.id;
+          user.tokens.push({ kind: 'qq', accessToken: accessToken });
+          user.profile.name = profile.displayName;
+          user.profile.picture = profile._json.avatar_url;
+          user.profile.location = profile._json.location;
+          user.profile.website = profile._json.blog;
+          user.save(function(err) {
+            done(err, user);
+          });
         }
-      })
-    }
-  ));
+      });
+    });
+  }
+}));
 
-  // use linkedin strategy
-  passport.use(new LinkedinStrategy({
-    consumerKey: config.linkedin.clientID,
-    consumerSecret: config.linkedin.clientSecret,
-    callbackURL: config.linkedin.callbackURL,
-    profileFields: ['id', 'first-name', 'last-name', 'email-address']
-    },
-    function(accessToken, refreshToken, profile, done) {
-      User.findOne({ 'linkedin.id': profile.id }, function (err, user) {
-        if (!user) {
-          user = new User({
-            name: profile.displayName
-          , email: profile.emails[0].value
-          , username: profile.emails[0].value
-          , provider: 'linkedin'
-          })
-          user.save(function (err) {
-            if (err) console.log(err)
-            return done(err, user)
-          })
+// use linkedin strategy
+passport.use(new LinkedInStrategy(config.linkedin, function(req, accessToken, refreshToken, profile, done) {
+  if (req.user) {
+    User.findOne({ linkedin: profile.id }, function(err, existingUser) {
+      if (existingUser) {
+        req.flash('errors', { msg: 'There is already a LinkedIn account that belongs to you. Sign in with that account or delete it, then link it with your current account.' });
+        done(err);
+      } else {
+        User.findById(req.user.id, function(err, user) {
+          user.linkedin = profile.id;
+          user.tokens.push({ kind: 'linkedin', accessToken: accessToken });
+          user.profile.name = user.profile.name || profile.displayName;
+          user.profile.location = user.profile.location || profile._json.location.name;
+          user.profile.picture = user.profile.picture || profile._json.pictureUrl;
+          user.profile.website = user.profile.website || profile._json.publicProfileUrl;
+          user.save(function(err) {
+            req.flash('info', { msg: 'LinkedIn account has been linked.' });
+            done(err, user);
+          });
+        });
+      }
+    });
+  } else {
+    User.findOne({ linkedin: profile.id }, function(err, existingUser) {
+      if (existingUser) return done(null, existingUser);
+      User.findOne({ email: profile._json.emailAddress }, function(err, existingEmailUser) {
+        if (existingEmailUser) {
+          req.flash('errors', { msg: 'There is already an account using this email address. Sign in to that account and link it with LinkedIn manually from Account Settings.' });
+          done(err);
         } else {
-          return done(err, user)
+          var user = new User();
+          user.linkedin = profile.id;
+          user.tokens.push({ kind: 'linkedin', accessToken: accessToken });
+          user.email = profile._json.emailAddress;
+          user.profile.name = profile.displayName;
+          user.profile.location = profile._json.location.name;
+          user.profile.picture = profile._json.pictureUrl;
+          user.profile.website = profile._json.publicProfileUrl;
+          user.save(function(err) {
+            done(err, user);
+          });
         }
-      })
-    }
-    ));
-}
+      });
+    });
+  }
+}));
+
+// Login Required middleware.
+
+exports.isAuthenticated = function(req, res, next) {
+  if (req.isAuthenticated()) return next();
+  res.redirect('/login');
+};
+
+// Authorization Required middleware.
+
+exports.isAuthorized = function(req, res, next) {
+  var provider = req.path.split('/').slice(-1)[0];
+
+  if (_.findWhere(req.user.tokens, { kind: provider })) {
+    next();
+  } else {
+    res.redirect('/auth/' + provider);
+  }
+};
