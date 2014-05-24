@@ -6,6 +6,7 @@ var express = require('express')
     , expressValidator = require('express-validator')
     , errorHandler = require('errorhandler')
     , csrf = require('lusca').csrf()
+    , helpers = require('view-helpers')
     , config = require('./config');
 
 module.exports = function (app, passport) {
@@ -54,7 +55,8 @@ module.exports = function (app, passport) {
     app.use(passport.session());
     // connect flash for flash messages - should be declared after sessions
     app.use(flash());
-
+    // should be declared after session and flash
+    app.use(helpers('Relax'));
     // adds CSRF attack protect
     var whitelist = ['/url1', '/url2'];
     app.use(function(req, res, next){

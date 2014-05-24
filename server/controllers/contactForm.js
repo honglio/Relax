@@ -1,12 +1,6 @@
 var config = require('../../config/config');
 var nodemailer = require("nodemailer");
-var smtpTransport = nodemailer.createTransport('SMTP', {
-  service: 'QQ',
-  auth: {
-    user: config.mail.auth.user,
-    pass: config.mail.auth.pass
-  }
-});
+var smtpTransport = nodemailer.createTransport('SMTP', config.mail);
 
 /**
  * POST /contact
@@ -25,28 +19,28 @@ exports.postContact = function(req, res) {
 
   if (errors) {
     req.flash('errors', errors);
-    return res.redirect('/contact');
+    return res.redirect('/contactForm');
   }
 
   var from = req.body.email;
   var name = req.body.name;
   var body = req.body.message;
-  var to = 'your@email.com';
-  var subject = 'Contact Form | Hackathon Starter';
+  var to = 'info@niukj.com';
+  var subject = 'Contact Form | Relax';
 
   var mailOptions = {
     to: to,
-    from: from,
-    subject: subject,
+    from: to,
+    subject: from,
     text: body
   };
 
   smtpTransport.sendMail(mailOptions, function(err) {
     if (err) {
       req.flash('errors', { msg: err.message });
-      return res.redirect('/contact');
+      return res.redirect('/contactForm');
     }
     req.flash('success', { msg: 'Email has been sent successfully!' });
-    res.redirect('/contact');
+    res.redirect('/contactForm');
   });
 };

@@ -26,7 +26,7 @@
         "passport-local": "latest",
         "passport-weibo": ">=0.1.0",
         "passport-renren": ">=0.1.1",
-        "passport-qq": ">=0.0.3",
+        "passport-tencent": ">=0.0.2",
         "passport-linkedin-oauth2": "latest",
         "passport-github": "latest",
         "winston": "latest",
@@ -40,7 +40,9 @@
         "underscore": "latest",
         "request": "latest",
         "github-api": "latest",
-        "node-linkedin": "latest"
+        "node-linkedin": "latest",
+        "ali-oss": "latest",
+        "view-helpers": "latest"
     },
     "devDependencies": {
       "supertest": "latest",

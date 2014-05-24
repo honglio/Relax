@@ -1,22 +1,23 @@
 var mongoose = require('mongoose')
   , config = require('../../config/config')
-  , utils = require('../../lib/utils')
+  , OSS = require('ali-oss')
+  , utils = require('../../lib/utils');
 
 /**
  * Getters
  */
 
 var getTags = function (tags) {
-  return tags.join(',')
-}
+  return tags.join(',');
+};
 
 /**
  * Setters
  */
 
 var setTags = function (tags) {
-  return tags.split(',')
-}
+  return tags.split(',');
+};
 
 /**
  * Article Schema
@@ -25,19 +26,19 @@ var setTags = function (tags) {
 var ArticleSchema = new mongoose.Schema({
   title: {type : String, default : '', trim : true},
   body: {type : String, default : '', trim : true},
-  user: {type : mongoose.Schema.ObjectId, ref : 'User'},
+  user: {type : mongoose.Schema.ObjectId, ref : 'Account'},
   comments: [{
     body: { type : String, default : '' },
-    user: { type : mongoose.Schema.ObjectId, ref : 'User' },
+    user: { type : mongoose.Schema.ObjectId, ref : 'Account' },
     createdAt: { type : Date, default : Date.now }
   }],
   tags: {type: [], get: getTags, set: setTags},
-  coverImage: {
+  image: {
     cdnUri: String,
     files: []
   },
   createdAt  : {type : Date, default : Date.now}
-})
+});
 
 /**
  * Validations
@@ -51,16 +52,16 @@ ArticleSchema.path('body').required(true, 'Article body cannot be blank');
  */
 
 ArticleSchema.pre('remove', function (next) {
-  var imager = new Imager(imagerConfig, 'S3')
-  var files = this.image.files
+  var ossClient = OSS.create(config.oss);
+  var files = this.image.files;
 
   // if there are files associated with the item, remove from the cloud too
-  imager.remove(files, function (err) {
-    if (err) return next(err)
-  }, 'article')
+  ossClient.remove(files, function (err) {
+    if (err) return next(err);
+  }, 'article');
 
-  next()
-})
+  next();
+});
 
 /**
  * Methods
@@ -77,21 +78,21 @@ ArticleSchema.methods = {
    */
 
   uploadAndSave: function (images, cb) {
-    if (!images || !images.length) return this.save(cb)
+    if (!images || !images.length) return this.save(cb);
 
-    var imager = new Imager(imagerConfig, 'S3')
-    var self = this
+    var ossClient = OSS.create(config.oss);
+    var self = this;
 
     this.validate(function (err) {
       if (err) return cb(err);
-      imager.upload(images, function (err, cdnUri, files) {
-        if (err) return cb(err)
+      ossClient.upload(images, function (err, cdnUri, files) {
+        if (err) return cb(err);
         if (files.length) {
-          self.image = { cdnUri : cdnUri, files : files }
+          self.image = { cdnUri : cdnUri, files : files };
         }
-        self.save(cb)
-      }, 'article')
-    })
+        self.save(cb);
+      }, 'article');
+    });
   },
 
   /**
@@ -104,21 +105,13 @@ ArticleSchema.methods = {
    */
 
   addComment: function (user, comment, cb) {
-    var notify = require('../mailer')
 
     this.comments.push({
       body: comment.body,
       user: user._id
-    })
-
-    if (!this.user.email) this.user.email = 'email@product.com'
-    notify.comment({
-      article: this,
-      currentUser: user,
-      comment: comment.body
-    })
-
-    this.save(cb)
+    });
+    // TODO: email commenter's name and comment to article writer
+    this.save(cb);
   },
 
   /**
@@ -130,12 +123,12 @@ ArticleSchema.methods = {
    */
 
   removeComment: function (commentId, cb) {
-    var index = utils.indexof(this.comments, { id: commentId })
-    if (~index) this.comments.splice(index, 1)
-    else return cb('not found')
-    this.save(cb)
+    var index = utils.indexof(this.comments, { id: commentId });
+    if (~index) this.comments.splice(index, 1);
+    else return cb('not found');
+    this.save(cb);
   }
-}
+};
 
 /**
  * Statics
@@ -155,7 +148,7 @@ ArticleSchema.statics = {
     this.findOne({ _id : id })
       .populate('user', 'name email username')
       .populate('comments.user')
-      .exec(cb)
+      .exec(cb);
   },
 
   /**
@@ -167,16 +160,16 @@ ArticleSchema.statics = {
    */
 
   list: function (options, cb) {
-    var criteria = options.criteria || {}
+    var criteria = options.criteria || {};
 
     this.find(criteria)
       .populate('user', 'name username')
       .sort({'createdAt': -1}) // sort by date
       .limit(options.perPage)
       .skip(options.perPage * options.page)
-      .exec(cb)
+      .exec(cb);
   }
 
-}
+};
 
-mongoose.model('Article', ArticleSchema)
+mongoose.model('Article', ArticleSchema);

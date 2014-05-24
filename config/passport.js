@@ -97,7 +97,7 @@ passport.use(new WeiboStrategy(config.weibo,
         done(err);
       } else {
         User.findById(req.user.id, function(err, user) {
-          user.renren = profile.id;
+          user.weibo = profile.id;
           user.tokens.push({ kind: 'weibo', accessToken: accessToken, tokenSecret: tokenSecret });
           user.profile.name = user.profile.name || profile.displayName;
           user.profile.location = user.profile.location || profile._json.location;
@@ -285,5 +285,47 @@ exports.isAuthorized = function(req, res, next) {
     next();
   } else {
     res.redirect('/auth/' + provider);
+  }
+};
+
+// User authorization routing middleware
+
+exports.user = {
+  isAuthorized: function (req, res, next) {
+    console.log(req.profile);
+    console.log(req.user);
+    if (req.profile.id != req.user.id) {
+      req.flash('info', 'You are not authorized');
+      return res.redirect('/account/' + req.user.id);
+    }
+    next();
+  }
+}
+// Articles authorization routing middleware
+
+exports.article = {
+  isAuthorized: function (req, res, next) {
+    console.log(req.profile);
+    console.log(req.user);
+    if (req.user.id != req.article.user) {
+      req.flash('info', 'You are not authorized');
+      return res.redirect('/articles/' + req.article.id);
+    }
+    next();
+  }
+};
+
+// Comment authorization routing middleware
+
+exports.comment = {
+  isAuthorized: function (req, res, next) {
+    // if the current user is comment owner or article owner
+    // give them authority to delete
+    if (req.user.id === req.comment.user.id || req.user.id === req.article.user.id) {
+      next();
+    } else {
+      req.flash('info', 'You are not authorized');
+      res.redirect('/articles/' + req.article.id);
+    }
   }
 };

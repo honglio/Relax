@@ -1,0 +1,39 @@
+extends ../layout
+
+block content
+  h1= article.title
+  hr
+  .row
+    .col-md-8
+      p=article.body
+      .meta
+        - if (article.user)
+          - var name = article.user.profile.name ? article.user.profile.name : article.user.email
+          p Author :&nbsp;
+            a(href="/account/"+article.user._id)= name
+
+        - if (article.tags)
+          p Tags &nbsp;
+            - each tag in article.tags.split(',')
+              i.text-muted.fa.fa-tag &nbsp;
+              a.tag(href="/tags/"+tag)= tag
+              | &nbsp;&nbsp;
+
+        p.text-muted= formatDate(article.createdAt, "%b %d, %Y at %I:%M %p")
+
+    .col-md-4
+      - if (!article.isNew && article.image && article.image.files && article.image.files.length)
+        img(src=article.image.cdnUri + '/mini_' + article.image.files[0])
+
+  form(action="/articles/"+article.id, method="POST", onsubmit="return confirm('Are you sure?')")
+    input(type='hidden', name='_csrf', value=_csrf)
+    a.btn.btn-default(href='/articles/'+article._id+'/edit', title="edit") Edit
+    | &nbsp;
+    input(type="hidden", name="_method", value="DELETE")
+    button.btn.btn-danger(type="submit") Delete
+
+  br
+  h3 Comments
+  - each comment in article.comments
+    include ../comment/comment
+  include ../comment/form

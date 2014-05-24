@@ -10,18 +10,23 @@ module.exports = {
       host: "smtp.mxhichina.com",
       port: 25,
       secureConnection: false,
-      //name: "servername",
+      name: "niukj.com",
       auth: {
-        user: "info",
+        user: "info@niukj.com",
         pass: "12345china"
       },
       ignoreTLS: false,
-      debug: false,
+      debug: true,
       maxConnections: 5 // Default is 5
     },
+    oss: {
+      accessKeyId: 'id',
+      accessKeySecret: 'xxx',
+      bucket: 'test'
+    },
     weibo: {
-      clientID: "APP_ID",
-      clientSecret: "APP_SECRET",
+      clientID: "1876751546",
+      clientSecret: "620aab5cbf338f43a24034d28b7c32eb",
       callbackURL: "http://localhost:3000/auth/weibo/callback"
     },
     renren: {
@@ -30,18 +35,18 @@ module.exports = {
       callbackURL: "http://localhost:3000/auth/renren/callback"
     },
     qq: {
-      clientID: "APP_ID",
-      clientSecret: "APP_SECRET",
+      clientID: "101101356",
+      clientSecret: "6a1622fbe03ae484f4895394afdb5c28",
       callbackURL: "http://localhost:3000/auth/qq/callback"
     },
     linkedin: {
-      clientID: "CONSUMER_KEY",
-      clientSecret: "CONSUMER_SECRET",
+      clientID: "75d51iuwfnv5g9",
+      clientSecret: "xlvBqhYm4lKLjNNb",
       callbackURL: "http://localhost:3000/auth/linkedin/callback"
     },
     github: {
-      clientID: 'APP_ID',
-      clientSecret: 'APP_SECRET',
+      clientID: '4bc43dc1999bb1651532',
+      clientSecret: 'cdd93ddff63a2f39d729f645c9bbe9cdd2a8bd6a',
       callbackURL: 'http://localhost:3000/auth/github/callback'
     }
 }
