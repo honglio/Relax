@@ -8,7 +8,7 @@ block content
 
   .row
     .col-md-8
-      form.form-horizontal(method="POST", action=action, role="form")
+      form.form-horizontal(method="POST", action=action, role="form", accept="/gif, image/jpeg, image/png", enctype="multipart/form-data")
 
         input(type="hidden", name="_csrf", value=_csrf)
 
@@ -23,7 +23,7 @@ block content
         .form-group
           label.col-sm-2.control-label(for='file') Image
           .col-sm-10
-            input.form-control#file(type='file', name="image[]")
+            input.form-control#file(type='file', name="image" )
 
         .form-group
           label.col-sm-2.control-label(for='desc') Body
@@ -42,5 +42,5 @@ block content
             a.btn(href='/articles', title="cancel") Cancel
 
     .col-md-4
-      - if (!article.isNew && article.image && article.image.files && article.image.files.length)
-        img(src=article.image.cdnUri + "/mini_" + article.image.files[0])
+      - if (!article.isNew && article.image && article.image.data && article.image.data.length)
+        img(src=article.image.data)

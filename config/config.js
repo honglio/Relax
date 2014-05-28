@@ -20,9 +20,9 @@ module.exports = {
       maxConnections: 5 // Default is 5
     },
     oss: {
-      accessKeyId: 'id',
-      accessKeySecret: 'xxx',
-      bucket: 'test'
+      accessKeyId: '3wXgudE0HBMAsuvb',
+      accessKeySecret: '8Fl01JVf9L60DDWxighJq8dl4PeAPj',
+      host: 'oss-cn-beijing.aliyuncs.com'
     },
     weibo: {
       clientID: "1876751546",

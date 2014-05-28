@@ -59,7 +59,8 @@ exports.new = function(req, res){
 exports.create = function (req, res) {
   var article = new Article(req.body);
   article.user = req.user;
-  article.uploadAndSave(req.body.image, function (err) {
+
+  article.uploadAndSave(req.files.image, function (err) {
     if (!err) {
       req.flash('success', 'Successfully created article!');
       return res.redirect('/articles/'+article._id);
@@ -110,9 +111,20 @@ exports.update = function(req, res){
  */
 
 exports.show = function(req, res){
-  res.render('article/post', {
-    title: req.article.title,
-    article: req.article
+  var article = req.article;
+  article = extend(article, req.body);
+console.log(article);
+  article.download(req.article.image, function(err) {
+    if (err) {
+      res.render('article/post', {
+        article: article,
+        error: utils.errors(err.errors || err)
+      });
+    }
+
+    res.render('article/post', {
+      article: article
+    });
   });
 };
 

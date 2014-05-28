@@ -1,6 +1,6 @@
 var mongoose = require('mongoose')
   , config = require('../../config/config')
-  , OSS = require('ali-oss')
+  , OSS = require('aliyun-oss')
   , utils = require('../../lib/utils');
 
 /**
@@ -34,8 +34,8 @@ var ArticleSchema = new mongoose.Schema({
   }],
   tags: {type: [], get: getTags, set: setTags},
   image: {
-    cdnUri: String,
-    files: []
+    filename: {type : String, default : ''},
+    location: { type: String, default : 'tmp/'} // TODO: move to client side
   },
   createdAt  : {type : Date, default : Date.now}
 });
@@ -52,13 +52,17 @@ ArticleSchema.path('body').required(true, 'Article body cannot be blank');
  */
 
 ArticleSchema.pre('remove', function (next) {
-  var ossClient = OSS.create(config.oss);
-  var files = this.image.files;
+  var oss = OSS.createClient(config.oss);
+  var filename = this.image.filename;
 
   // if there are files associated with the item, remove from the cloud too
-  ossClient.remove(files, function (err) {
+  oss.deleteObject({
+    bucket: 'test-niukj',
+    object: filename
+  }, function (err) {
+    console.log(err);
     if (err) return next(err);
-  }, 'article');
+  });
 
   next();
 });
@@ -72,26 +76,66 @@ ArticleSchema.methods = {
   /**
    * Save article and upload image
    *
-   * @param {Object} images
+   * @param {Object} image
    * @param {Function} cb
    * @api private
    */
 
-  uploadAndSave: function (images, cb) {
-    if (!images || !images.length) return this.save(cb);
+  uploadAndSave: function (image, cb) {
+    if (!image) return this.save(cb);
 
-    var ossClient = OSS.create(config.oss);
+    console.log(image);
+    var oss = OSS.createClient(config.oss);
     var self = this;
+    console.log(oss);
 
-    this.validate(function (err) {
-      if (err) return cb(err);
-      ossClient.upload(images, function (err, cdnUri, files) {
-        if (err) return cb(err);
-        if (files.length) {
-          self.image = { cdnUri : cdnUri, files : files };
-        }
-        self.save(cb);
-      }, 'article');
+    oss.putObject({bucket: 'test-niukj',
+      object: image.name,
+      source: image.path,
+      headers: {}
+    }, function (err, res) {
+      if (err) {
+        console.log(err);
+        return cb(err);
+      }
+      if (res) {
+          console.log(res);
+          self.image.filename = image.name;
+          self.image.location = image.path;
+      }
+      self.save(cb);
+    });
+  },
+
+  /**
+   * download image from cdn
+   *
+   * @param {Object} image
+   * @param {Function} cb
+   * @api private
+   */
+  download: function (image, cb) {
+    if (!image || !image.filename) return;
+
+    console.log(image);
+    var oss = OSS.createClient(config.oss);
+    var self = this;
+    console.log(oss);
+    // TODO: move to client side.
+    oss.getObject({bucket: 'test-niukj',
+      object: image.filename,
+      dest: image.location,
+      headers: {}
+    }, function (err, res) {
+      if (err) {
+        console.log(err);
+        return cb(err);
+      }
+      if (res) {
+          console.log(res);
+          console.log(self.image);
+          cb();
+      }
     });
   },
 
