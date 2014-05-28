@@ -22,8 +22,8 @@ block content
         p.text-muted= formatDate(article.createdAt, "%b %d, %Y at %I:%M %p")
 
     .col-md-4
-      - if (!article.isNew && article.image && article.image.location)
-        img(src=article.image.location)
+      - if (!article.isNew && article.image && article.image.filename)
+        img(src='http://' + oss.bucketString + '.' + oss.host + '/' + article.image.filename)
 
   form(action="/articles/"+article.id, method="POST", onsubmit="return confirm('Are you sure?')")
     input(type='hidden', name='_csrf', value=_csrf)

@@ -2,6 +2,7 @@ var mongoose = require('mongoose')
   , Article = mongoose.model('Article')
   , utils = require('../../lib/utils')
   , extend = require('util')._extend
+  , config = require('../../config/config');
 
 /**
  * Load
@@ -111,21 +112,10 @@ exports.update = function(req, res){
  */
 
 exports.show = function(req, res){
-  var article = req.article;
-  article = extend(article, req.body);
-console.log(article);
-  article.download(req.article.image, function(err) {
-    if (err) {
-      res.render('article/post', {
-        article: article,
-        error: utils.errors(err.errors || err)
-      });
-    }
-
     res.render('article/post', {
-      article: article
+      article: req.article,
+      oss: config.oss
     });
-  });
 };
 
 /**

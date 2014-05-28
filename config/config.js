@@ -22,7 +22,8 @@ module.exports = {
     oss: {
       accessKeyId: '3wXgudE0HBMAsuvb',
       accessKeySecret: '8Fl01JVf9L60DDWxighJq8dl4PeAPj',
-      host: 'oss-cn-beijing.aliyuncs.com'
+      host: 'oss-cn-beijing.aliyuncs.com',
+      bucketString: 'test-niukj'
     },
     weibo: {
       clientID: "1876751546",

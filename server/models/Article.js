@@ -34,8 +34,7 @@ var ArticleSchema = new mongoose.Schema({
   }],
   tags: {type: [], get: getTags, set: setTags},
   image: {
-    filename: {type : String, default : ''},
-    location: { type: String, default : 'tmp/'} // TODO: move to client side
+    filename: {type : String, default : ''}
   },
   createdAt  : {type : Date, default : Date.now}
 });
@@ -57,7 +56,7 @@ ArticleSchema.pre('remove', function (next) {
 
   // if there are files associated with the item, remove from the cloud too
   oss.deleteObject({
-    bucket: 'test-niukj',
+    bucket: config.oss.bucketString,
     object: filename
   }, function (err) {
     console.log(err);
@@ -89,7 +88,8 @@ ArticleSchema.methods = {
     var self = this;
     console.log(oss);
 
-    oss.putObject({bucket: 'test-niukj',
+    oss.putObject({
+      bucket: config.oss.bucketString,
       object: image.name,
       source: image.path,
       headers: {}
@@ -101,41 +101,8 @@ ArticleSchema.methods = {
       if (res) {
           console.log(res);
           self.image.filename = image.name;
-          self.image.location = image.path;
       }
       self.save(cb);
-    });
-  },
-
-  /**
-   * download image from cdn
-   *
-   * @param {Object} image
-   * @param {Function} cb
-   * @api private
-   */
-  download: function (image, cb) {
-    if (!image || !image.filename) return;
-
-    console.log(image);
-    var oss = OSS.createClient(config.oss);
-    var self = this;
-    console.log(oss);
-    // TODO: move to client side.
-    oss.getObject({bucket: 'test-niukj',
-      object: image.filename,
-      dest: image.location,
-      headers: {}
-    }, function (err, res) {
-      if (err) {
-        console.log(err);
-        return cb(err);
-      }
-      if (res) {
-          console.log(res);
-          console.log(self.image);
-          cb();
-      }
     });
   },
 
