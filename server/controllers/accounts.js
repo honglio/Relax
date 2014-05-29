@@ -44,7 +44,9 @@ exports.getStatus = function(req, res) {
     var accountId = req.params.id == 'me'
                         ? req.session.accountId
                         : req.params.id;
+        console.log(req);
     Account.findById(accountId, function(account) {
+      console.log(account);
       if (null!=account) {
         res.send(account.status);
       }
@@ -150,6 +152,7 @@ exports.getAccount = function(req, res) {
   var accountId = req.params.id == 'me'
                      ? req.session.accountId
                      : req.params.id;
+      console.log(req);
   Account.findById(accountId, function(account) {
     if ( Account.hasFollower(account, req.session.accountId) ) {
       account.isFollower = true;
@@ -175,6 +178,19 @@ exports.findContact = function(req, res) {
     } else {
       res.send(accounts);
     }
+  });
+};
+
+/**
+ * Load
+ */
+
+exports.load = function(req, res, next, id){
+  Account.load(id, function (err, account) {
+    if (err) return next(err);
+    if (!account) return next(new Error('not found'));
+    req.account = account;
+    next();
   });
 };
 

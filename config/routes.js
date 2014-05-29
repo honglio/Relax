@@ -64,15 +64,16 @@ module.exports = function (app, passport) {
   /**
    * user account routes.
    */
-  app.get('/account/:id/contacts', passportConf.isAuthenticated, accounts.getContact);
-  app.post('/account/:id/contact', passportConf.isAuthenticated, passportConf.user.isAuthorized, accounts.addContact);
-  app.delete('/account/:id/contact', passportConf.isAuthenticated, passportConf.user.isAuthorized, accounts.removeContact);
+  app.param('uid', accounts.load);
 
-  app.get('/account/:id/viewNum', passportConf.isAuthenticated, accounts.getViewNum);
-  app.post('/account/:id/viewNum', passportConf.isAuthenticated, passportConf.user.isAuthorized, accounts.postViewNum);
-  app.get('/account/:id', passportConf.isAuthenticated, accounts.getAccount); // index.account
-  // app.get('/account/:id/profile', passportConf.isAuthenticated, accounts.getStatus);
-  app.post('/account/:id/profile', passportConf.isAuthenticated, passportConf.user.isAuthorized, accounts.addStatus);
+  app.get('/account/:uid/contacts', passportConf.isAuthenticated, accounts.getContact);
+  app.post('/account/:uid/contact', passportConf.isAuthenticated, passportConf.user.isAuthorized, accounts.addContact);
+  app.delete('/account/:uid/contact', passportConf.isAuthenticated, passportConf.user.isAuthorized, accounts.removeContact);
+
+  app.get('/account/:uid/viewNum', passportConf.isAuthenticated, accounts.getViewNum);
+  app.post('/account/:uid/viewNum', passportConf.isAuthenticated, passportConf.user.isAuthorized, accounts.postViewNum);
+
+  app.get('/account/:uid', passportConf.isAuthenticated, index.accountbyId);
   app.post('/account/profile', passportConf.isAuthenticated, accounts.postUpdateProfile);
   app.post('/account/password', passportConf.isAuthenticated, accounts.postUpdatePassword);
   app.post('/account/delete', passportConf.isAuthenticated, accounts.postDeleteAccount);

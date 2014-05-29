@@ -82,6 +82,19 @@ AccountSchema.pre('save', function(next) {
 });
 
 AccountSchema.statics = {
+
+  /**
+   * Find account by id
+   *
+   * @param {ObjectId} id
+   * @param {Function} cb
+   * @api private
+   */
+
+  load: function (id, cb) {
+    this.findOne({ _id : id }).exec(cb);
+  },
+
   addFollower: function(account, addContact) {
     console.log(account);
     console.log(addContact);
