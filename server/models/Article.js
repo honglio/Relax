@@ -81,7 +81,7 @@ ArticleSchema.methods = {
    */
 
   uploadAndSave: function (image, cb) {
-    if (!image) return this.save(cb);
+    if (!image.name || !image.size) return this.save(cb);
 
     console.log(image);
     var oss = OSS.createClient(config.oss);

@@ -305,9 +305,7 @@ exports.user = {
 
 exports.article = {
   isAuthorized: function (req, res, next) {
-    console.log(req.profile);
-    console.log(req.user);
-    if (req.user.id != req.article.user) {
+    if (req.user.id !== req.article.user.id) {
       req.flash('info', 'You are not authorized');
       return res.redirect('/articles/' + req.article.id);
     }

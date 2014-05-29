@@ -82,7 +82,8 @@ exports.create = function (req, res) {
 exports.edit = function (req, res) {
   res.render('article/edit', {
     title: 'Edit ' + req.article.title,
-    article: req.article
+    article: req.article,
+    oss: config.oss
   });
 };
 

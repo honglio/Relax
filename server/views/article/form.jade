@@ -42,5 +42,5 @@ block content
             a.btn(href='/articles', title="cancel") Cancel
 
     .col-md-4
-      - if (!article.isNew && article.image && article.image.data && article.image.data.length)
-        img(src=article.image.data)
+      - if (!article.isNew && article.image && article.image.filename)
+        img(src=src='http://' + oss.bucket + '.' + oss.host + '/' + article.image.filename)
