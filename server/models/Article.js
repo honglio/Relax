@@ -56,7 +56,7 @@ ArticleSchema.pre('remove', function (next) {
 
   // if there are files associated with the item, remove from the cloud too
   oss.deleteObject({
-    bucket: config.oss.bucketString,
+    bucket: config.oss.bucket,
     object: filename
   }, function (err) {
     console.log(err);
@@ -89,7 +89,7 @@ ArticleSchema.methods = {
     console.log(oss);
 
     oss.putObject({
-      bucket: config.oss.bucketString,
+      bucket: config.oss.bucket,
       object: image.name,
       source: image.path,
       headers: {}
