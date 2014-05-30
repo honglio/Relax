@@ -66,14 +66,11 @@ module.exports = function (app, passport) {
    */
   app.param('uid', accounts.load);
 
-  app.get('/account/:uid/contacts', passportConf.isAuthenticated, accounts.getContact);
-  app.post('/account/:uid/contact', passportConf.isAuthenticated, passportConf.user.isAuthorized, accounts.addContact);
-  app.delete('/account/:uid/contact', passportConf.isAuthenticated, passportConf.user.isAuthorized, accounts.removeContact);
+  app.get('/account/:uid', passportConf.isAuthenticated, accounts.accountbyId);
+  app.post('/account/:uid/contact', passportConf.isAuthenticated, accounts.addContact);
+  app.delete('/account/:uid/contact', passportConf.isAuthenticated, accounts.removeContact);
 
-  app.get('/account/:uid/viewNum', passportConf.isAuthenticated, accounts.getViewNum);
-  app.post('/account/:uid/viewNum', passportConf.isAuthenticated, passportConf.user.isAuthorized, accounts.postViewNum);
 
-  app.get('/account/:uid', passportConf.isAuthenticated, index.accountbyId);
   app.post('/account/profile', passportConf.isAuthenticated, accounts.postUpdateProfile);
   app.post('/account/password', passportConf.isAuthenticated, accounts.postUpdatePassword);
   app.post('/account/delete', passportConf.isAuthenticated, accounts.postDeleteAccount);
@@ -122,6 +119,8 @@ module.exports = function (app, passport) {
   app.get('/articles/:id/edit', passportConf.isAuthenticated, passportConf.article.isAuthorized, articles.edit);
   app.put('/articles/:id', passportConf.isAuthenticated, passportConf.article.isAuthorized, articles.update);
   app.del('/articles/:id', passportConf.isAuthenticated, passportConf.article.isAuthorized, articles.destroy);
+
+  app.post('/articles/:id/viewNum', articles.postViewNum);
 
   // comment routes
   app.param('commentId', comments.load);

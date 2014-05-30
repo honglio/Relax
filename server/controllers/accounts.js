@@ -8,85 +8,29 @@ var _ = require('underscore');
    *
    ***************************************************/
 
-exports.getViewNum = function(req, res) {
-    var accountId = req.params.id == 'me'
-                        ? req.session.accountId
-                        : req.params.id;
-    Account.findById(accountId, function(account) {
-      if (null!=account) {
-        console.log(account.viewNum);
-        res.send({data: account.viewNum});
+/**
+ * GET /account
+ * Profile page.
+ */
+
+exports.accountbyId = function(req, res) {
+  console.log('accountbyId');
+  var contactId = req.param('uid', null);
+  Account.findById(req.user.id, function(err, user) {
+    if (err) return next(err);
+    if ( user ) {
+      if(Account.hasFollowing(user, contactId)) {
+          res.render('account/profileById', {
+            title: 'Account Management',
+            followed: true
+          });
+      } else {
+        res.render('account/profileById', {
+          title: 'Account Management',
+          followed: false
+        });
       }
-    });
-};
-
-exports.postViewNum = function(req, res) {
-  var accountId = req.params.id == 'me'
-                    ? req.session.accountId
-                    : req.params.id;
-  var viewNum = req.param('viewNum', null);
-
-  if( null == viewNum ) {
-    res.send(400);
-    return;
-  }
-
-  Account.findById(accountId, function(account) {
-    if ( account ) {
-      account.viewNum += 1;
-      account.save();
     }
-  });
-  res.send(200);
-};
-
-exports.getStatus = function(req, res) {
-    var accountId = req.params.id == 'me'
-                        ? req.session.accountId
-                        : req.params.id;
-        console.log(req);
-    Account.findById(accountId, function(account) {
-      console.log(account);
-      if (null!=account) {
-        res.send(account.status);
-      }
-    });
-};
-
-exports.addStatus = function(req, res) {
-  var accountId = req.params.id == 'me'
-                      ? req.session.accountId
-                      : req.params.id;
-  Account.findById(accountId, function(account) {
-    if (null!=account) {
-      var status = {
-          name: {
-            first: account.name.first,
-            last: account.name.last,
-            full: account.name.full
-          },
-          status: req.param('status', '')
-      };
-      account.status.push(status);
-
-      // Push the status to all friends
-      account.activity.push(status);
-      account.save(function (err) {
-        if (err) {
-            console.log('Error saving account: ' + err);
-        }
-      });
-    }
-  });
-  res.send(200);
-};
-
-exports.getContact = function(req, res) {
-  var accountId = req.params.id == 'me'
-                      ? req.session.accountId
-                      : req.params.id;
-  Account.findById(accountId, function(account) {
-    if(null!=account) res.send(account.contacts);
   });
 };
 
@@ -118,49 +62,50 @@ exports.removeContact = function(req, res) {
   res.send(200);
 };
 
-exports.addContact = function(req, res) {
-  var accountId = req.params.id == 'me'
-                     ? req.session.accountId
-                     : req.params.id;
-  var contactId = req.param('contactId', null);
+
+
+exports.addContact = function(req, res, next) {
+  var contactId = req.param('uid', null);
 
   // Missing contactId, don't bother going any further, or
   // contactId is the same as accountId, you can't add yourself as contact.
-  if ( null == contactId || contactId === accountId ) {
-    res.send(400);
-    return;
+  if ( null == contactId || contactId === req.user.id ) {
+    req.flash('errors', { msg: 'Can not add yourself as contact.' });
+    return res.redirect('/account/' + contactId);
   }
 
-  Account.findById(accountId, function(account) {
-    if ( account ) {
-      Account.findById(contactId, function(contact) {
-        Account.addFollowing(account, contact);
+  Account.findById(req.user.id, function(err, user) {
+    if (err) return next(err);
+    if ( user ) {
+      Account.findById(contactId, function(err, contact) {
+        if (err) return next(err);
+        console.log('addContact: ' + user);
+        if(!Account.hasFollowing(user, contact) &&
+            !Account.hasFollower(contact, user)) {
+          Account.addFollowing(user, contact);
+          Account.addFollower(contact, user);
 
-        // Make the reverse link
-        Account.addFollower(contact, account);
-        account.save();
+          user.save(function (err) {
+            if (err) {
+              console.log('Error saving account: ' + err);
+              return next(err);
+            }
+          });
+          contact.save(function (err) {
+            if (err) {
+              console.log('Error saving account: ' + err);
+              return next(err);
+            }
+          });
+
+          req.flash('success', { msg: 'Contact Added.' });
+          return res.redirect('/account/' + contactId);
+        } else {
+          req.flash('errors', { msg: 'Already followd.' });
+          return res.redirect('/account/' + contactId);
+        }
       });
     }
-  });
-
-  // Note: Not in callback - this endpoint returns immediately and
-  // processes in the background
-  res.send(200);
-};
-
-exports.getAccount = function(req, res) {
-  var accountId = req.params.id == 'me'
-                     ? req.session.accountId
-                     : req.params.id;
-      console.log(req);
-  Account.findById(accountId, function(account) {
-    if ( Account.hasFollower(account, req.session.accountId) ) {
-      account.isFollower = true;
-    }
-    if ( Account.hasFollowing(account, req.session.accountId) ) {
-      account.isFollowing = true;
-    }
-    res.send(account);
   });
 };
 
@@ -208,7 +153,7 @@ exports.postUpdateProfile = function(req, res, next) {
     user.profile.location = req.body.location || '';
     user.profile.website = req.body.website || '';
 
-    user.save(function(err) {
+    user.save(function (err) {
       if (err) return next(err);
       req.flash('success', { msg: 'Profile information updated.' });
       res.redirect('/account');

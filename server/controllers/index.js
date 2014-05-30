@@ -57,18 +57,6 @@ exports.account = function(req, res) {
 };
 
 /**
- * GET /account
- * Profile page.
- */
-
-exports.accountbyId = function(req, res) {
-  console.log(req);
-  res.render('account/profileById', {
-    title: 'Account Management'
-  });
-};
-
-/**
  * GET /api
  * List of API examples.
  */

@@ -22,15 +22,24 @@ exports.load = function(req, res, next, id){
  */
 
 exports.index = function(req, res){
+
   var page = (req.param('page') > 0 ? req.param('page') : 1) - 1;
-  var perPage = 30;
+  var perPage = 3;
   var options = {
     perPage: perPage,
     page: page
   };
 
+  /* list only req user's article */
+  // var options = {
+  //   perPage: perPage,
+  //   page: page,
+  //   criteria: {user: req.user}
+  // };
+
   Article.list(options, function(err, articles) {
     if (err) return res.render('500');
+    console.log('article list:' + articles);
     Article.count().exec(function (err, count) {
       res.render('article/index', {
         title: 'Articles',
@@ -130,4 +139,24 @@ exports.destroy = function(req, res){
     req.flash('info', 'Deleted successfully');
     res.redirect('/articles');
   });
+};
+
+exports.postViewNum = function(req, res) {
+  var accountId = req.params.id == 'me'
+                    ? req.session.accountId
+                    : req.params.id;
+  var viewNum = req.param('viewNum', null);
+
+  if( null == viewNum ) {
+    res.send(400);
+    return;
+  }
+
+  Account.findById(accountId, function(account) {
+    if ( account ) {
+      account.viewNum += 1;
+      account.save();
+    }
+  });
+  res.send(200);
 };

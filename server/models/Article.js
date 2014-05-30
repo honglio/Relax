@@ -174,7 +174,7 @@ ArticleSchema.statics = {
     var criteria = options.criteria || {};
 
     this.find(criteria)
-      .populate('user', 'name username')
+      .populate('user', 'profile')
       .sort({'createdAt': -1}) // sort by date
       .limit(options.perPage)
       .skip(options.perPage * options.page)

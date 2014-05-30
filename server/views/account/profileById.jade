@@ -34,3 +34,14 @@ block content
       label.col-sm-2.control-label(for='gravatar') Gravatar
       .col-sm-4
         img(src="#{req.account.gravatar()}", class='profile', width='100', height='100')
+
+  form.form-horizontal(action='/account/' + req.account.id + '/contact', method='POST')
+    input(type='hidden', name='_csrf', value=_csrf)
+    if !followed
+      .form-group
+        .col-sm-offset-2.col-sm-10
+          button.btn.btn-primary(type='submit' id='follow') Follow
+    else
+      .form-group
+        .col-sm-offset-2.col-sm-10
+          button.btn.btn-danger(type='submit' id='following') Following

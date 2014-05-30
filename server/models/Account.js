@@ -3,24 +3,18 @@ var bcrypt = require('bcrypt-nodejs');
 var crypto = require('crypto');
 
 var Status = new mongoose.Schema({
-  name: {
-    first:   { type: String },
-    last:    { type: String },
-    full:    { type: String }
-  },
+  name: { type: String },
   status:    { type: String }
 });
 
-var Contact = new mongoose.Schema({
-  name: {
-    first:   { type: String },
-    last:    { type: String },
-    full:    { type: String }
-  },
-  accountId: { type: mongoose.Schema.ObjectId },
+var ContactSchema = new mongoose.Schema({
+  name: { type: String },
+  accountId: { type: mongoose.Schema.ObjectId, ref : 'Account'},
   added:     { type: Date },     // When the contact was added
   updated:   { type: Date }      // When the contact last updated
 });
+
+mongoose.model('Contact', ContactSchema);
 
 var AccountSchema = new mongoose.Schema({
   email:     { type: String, unique: true, lowercase: true },
@@ -37,16 +31,7 @@ var AccountSchema = new mongoose.Schema({
   tokens: { type: Array },
 
   profile: {
-    name: {
-      first:   { type: String },
-      last:    { type: String },
-      full:    { type: String }
-    },
-    birthday: {
-      day:     { type: Number, min: 1, max: 31, required: false },
-      month:   { type: Number, min: 1, max: 12, required: false },
-      year:    { type: Number }
-    },
+    name: { type: String },
     gender: { type: String, default: '' },
     location: { type: String, default: '' },
     website: { type: String, default: '' },
@@ -54,12 +39,13 @@ var AccountSchema = new mongoose.Schema({
     biography: { type: String, default: '' }
   },
   contacts:  {
-    followers: [Contact],
-    followings: [Contact]
+    followers: [ContactSchema],
+    followings: [ContactSchema]
   },
   status:    [Status], // My own status updates only
   viewNum:   { type: Number, default: 0 }
 });
+
 
 /**
  * Hash the password for security.
@@ -96,45 +82,28 @@ AccountSchema.statics = {
   },
 
   addFollower: function(account, addContact) {
-    console.log(account);
-    console.log(addContact);
+    console.log('addFollower:' + account);
+    console.log('addFollower:' + addContact);
+
     var follower = {
-      name: {
-        first: addContact.name.first,
-        last: addContact.name.last,
-        full: addContact.name.full
-      },
+      name: addContact.name,
       accountId: addContact._id,
       added: new Date(),
       updated: new Date()
     };
     account.contacts.followers.push(follower);
-
-    account.save(function (err) {
-      if (err) {
-        console.log('Error saving account: ' + err);
-      }
-    });
   },
 
   addFollowing: function(account, addContact) {
+    console.log('addFollowing:' + account);
+    console.log('addFollowing:' + addContact);
     var following = {
-      name: {
-        first: addContact.name.first,
-        last: addContact.name.last,
-        full: addContact.name.full
-      },
+      name: addContact.name,
       accountId: addContact._id,
       added: new Date(),
       updated: new Date()
     };
     account.contacts.followings.push(following);
-
-    account.save(function (err) {
-      if (err) {
-        console.log('Error saving account: ' + err);
-      }
-    });
   },
 
   removeFollower: function(account, contactId) {
@@ -159,27 +128,24 @@ AccountSchema.statics = {
     account.save();
   },
 
-  // check if has follower
+    // check if has follower
   hasFollower: function(account, contactId) {
     if ( null == account.contacts.followers ) return false;
-
-    account.contacts.followers.forEach(function(follower) {
-      if ( follower.accountId == contactId ) {
-        return true;
-      }
-    });
+    var length = account.contacts.followers.length;
+    for (var i=0; i<length; i++) {
+      if ( account.contacts.followers[i].accountId == contactId ) return true;
+    }
     return false;
   },
 
   // check if has following
   hasFollowing: function(account, contactId) {
     if ( null == account.contacts.followings ) return false;
-
-    account.contacts.followings.forEach(function(following) {
-      if ( following.accountId == contactId ) {
-        return true;
-      }
-    });
+    // Shouldn't use forEach, because callback will block the process. so function return false always.
+    var length = account.contacts.followings.length;
+    for (var i=0; i<length; i++) {
+      if ( account.contacts.followings[i].accountId == contactId ) return true;
+    }
     return false;
   }
 };
