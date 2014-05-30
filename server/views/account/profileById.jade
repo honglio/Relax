@@ -37,11 +37,9 @@ block content
 
   form.form-horizontal(action='/account/' + req.account.id + '/contact', method='POST')
     input(type='hidden', name='_csrf', value=_csrf)
-    if !followed
-      .form-group
-        .col-sm-offset-2.col-sm-10
-          button.btn.btn-primary(type='submit' id='follow') Follow
-    else
-      .form-group
-        .col-sm-offset-2.col-sm-10
-          button.btn.btn-danger(type='submit' id='following') Following
+    .form-group
+      .col-sm-offset-2.col-sm-10
+        if !followed
+          button.btn.btn-primary(type='submit') Follow
+        else
+          button.btn.btn-danger(type="submit" name="_method", value="DELETE") UnFollow

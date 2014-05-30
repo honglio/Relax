@@ -114,7 +114,6 @@ AccountSchema.statics = {
         account.contacts.followers.remove(follower);
       }
     });
-    account.save();
   },
 
   removeFollowing: function(account, contactId) {
@@ -125,7 +124,6 @@ AccountSchema.statics = {
         account.contacts.followings.remove(following);
       }
     });
-    account.save();
   },
 
     // check if has follower

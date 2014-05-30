@@ -118,7 +118,7 @@ module.exports = function (app, passport) {
   app.get('/articles/:id', articles.show);
   app.get('/articles/:id/edit', passportConf.isAuthenticated, passportConf.article.isAuthorized, articles.edit);
   app.put('/articles/:id', passportConf.isAuthenticated, passportConf.article.isAuthorized, articles.update);
-  app.del('/articles/:id', passportConf.isAuthenticated, passportConf.article.isAuthorized, articles.destroy);
+  app.delete('/articles/:id', passportConf.isAuthenticated, passportConf.article.isAuthorized, articles.destroy);
 
   app.post('/articles/:id/viewNum', articles.postViewNum);
 
@@ -126,7 +126,7 @@ module.exports = function (app, passport) {
   app.param('commentId', comments.load);
   app.post('/articles/:id/comments', passportConf.isAuthenticated, comments.create);
   app.get('/articles/:id/comments', passportConf.isAuthenticated, comments.create);
-  app.del('/articles/:id/comments/:commentId', passportConf.isAuthenticated, passportConf.comment.isAuthorized, comments.destroy);
+  app.delete('/articles/:id/comments/:commentId', passportConf.isAuthenticated, passportConf.comment.isAuthorized, comments.destroy);
 
   // tag routes
   app.get('/tags/:tag', tags.index);

@@ -13,55 +13,58 @@ var _ = require('underscore');
  * Profile page.
  */
 
-exports.accountbyId = function(req, res) {
+exports.accountbyId = function(req, res, next) {
   console.log('accountbyId');
   var contactId = req.param('uid', null);
   Account.findById(req.user.id, function(err, user) {
     if (err) return next(err);
-    if ( user ) {
-      if(Account.hasFollowing(user, contactId)) {
-          res.render('account/profileById', {
-            title: 'Account Management',
-            followed: true
-          });
-      } else {
+    if ( !user ) return;
+
+    if(Account.hasFollowing(user, contactId)) {
         res.render('account/profileById', {
           title: 'Account Management',
-          followed: false
+          followed: true
         });
-      }
+    } else {
+      res.render('account/profileById', {
+        title: 'Account Management',
+        followed: false
+      });
     }
   });
 };
 
-exports.removeContact = function(req, res) {
-  var accountId = req.params.id == 'me'
-                     ? req.session.accountId
-                     : req.params.id;
-  var contactId = req.param('contactId', null);
+exports.removeContact = function(req, res, next) {
+  var contactId = req.param('uid', null);
 
-  // Missing contactId, don't bother going any further
-  if ( null == contactId ) {
-    res.send(400);
-    return;
-  }
-
-  Account.findById(accountId, function(account) {
-    if ( !account ) return;
-    Account.findById(contactId, function(contact, err) {
+  Account.findById(req.user.id, function(err, user) {
+    if (err) return next(err);
+    if ( !user ) return;
+    Account.findById(contactId, function(err, contact) {
+      if (err) return next(err);
       if ( !contact ) return;
-
-      Account.removeFollowing(account, contactId);
+      console.log('removeContact:');
+      Account.removeFollowing(user, contactId);
       // Kill the reverse link
-      Account.removeFollower(contact, accountId);
+      Account.removeFollower(contact, req.user.id);
+
+      user.save(function (err) {
+        if (err) {
+          console.log('Error saving account: ' + err);
+          return next(err);
+        }
+      });
+      contact.save(function (err) {
+        if (err) {
+          console.log('Error saving account: ' + err);
+          return next(err);
+        }
+      });
+      req.flash('success', { msg: 'Contact Removed.' });
+      return res.redirect('/account/' + contactId);
     });
   });
-
-  // Note: Not in callback - this endpoint returns immediately and
-  // processes in the background
-  res.send(200);
 };
-
 
 
 exports.addContact = function(req, res, next) {
@@ -76,36 +79,31 @@ exports.addContact = function(req, res, next) {
 
   Account.findById(req.user.id, function(err, user) {
     if (err) return next(err);
-    if ( user ) {
-      Account.findById(contactId, function(err, contact) {
-        if (err) return next(err);
-        console.log('addContact: ' + user);
-        if(!Account.hasFollowing(user, contact) &&
-            !Account.hasFollower(contact, user)) {
-          Account.addFollowing(user, contact);
-          Account.addFollower(contact, user);
+    if ( !user ) return;
+    Account.findById(contactId, function(err, contact) {
+      if (err) return next(err);
+      if ( !contact ) return;
+      console.log('addContact:');
 
-          user.save(function (err) {
-            if (err) {
-              console.log('Error saving account: ' + err);
-              return next(err);
-            }
-          });
-          contact.save(function (err) {
-            if (err) {
-              console.log('Error saving account: ' + err);
-              return next(err);
-            }
-          });
+      Account.addFollowing(user, contact);
+      Account.addFollower(contact, user);
 
-          req.flash('success', { msg: 'Contact Added.' });
-          return res.redirect('/account/' + contactId);
-        } else {
-          req.flash('errors', { msg: 'Already followd.' });
-          return res.redirect('/account/' + contactId);
+      user.save(function (err) {
+        if (err) {
+          console.log('Error saving account: ' + err);
+          return next(err);
         }
       });
-    }
+      contact.save(function (err) {
+        if (err) {
+          console.log('Error saving account: ' + err);
+          return next(err);
+        }
+      });
+
+      req.flash('success', { msg: 'Contact Added.' });
+      return res.redirect('/account/' + contactId);
+    });
   });
 };
 
@@ -232,8 +230,8 @@ function findByString(searchStr, callback) {
   var searchRegex = new RegExp(searchStr, 'i');
   Account.find({
     $or: [
-      { 'name.full':  { $regex: searchRegex } },
-      { email:        { $regex: searchRegex } }
+      { 'name':  { $regex: searchRegex } },
+      { email:   { $regex: searchRegex } }
     ]
   }, callback);
 };
