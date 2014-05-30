@@ -14,8 +14,6 @@ var ContactSchema = new mongoose.Schema({
   updated:   { type: Date }      // When the contact last updated
 });
 
-mongoose.model('Contact', ContactSchema);
-
 var AccountSchema = new mongoose.Schema({
   email:     { type: String, unique: true, lowercase: true },
   password:  { type: String },

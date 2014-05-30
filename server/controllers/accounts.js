@@ -2,6 +2,9 @@ var mongoose = require('mongoose');
 var Account = mongoose.model('Account');
 var _ = require('underscore');
 
+var callback = function(cb) {
+  cb();
+}
 /***************************************************
    *
    * Account
@@ -14,24 +17,42 @@ var _ = require('underscore');
  */
 
 exports.accountbyId = function(req, res, next) {
-  console.log('accountbyId');
-  var contactId = req.param('uid', null);
-  Account.findById(req.user.id, function(err, user) {
-    if (err) return next(err);
-    if ( !user ) return;
 
-    if(Account.hasFollowing(user, contactId)) {
+  var contactId = req.param('uid', null);
+
+  req.account.contacts.followings.forEach(function(following, i) {
+    Account.load(following.accountId, function(err, contact) {
+      if (err) next(err);
+      req.account.contacts.followings[i] = contact;
+    });
+  });
+  req.account.contacts.followers.forEach(function(follower, i) {
+    Account.load(follower.accountId, function(err, contact) {
+      if (err) next(err);
+      req.account.contacts.followers[i] = contact;
+    });
+  });
+
+  setTimeout(function() {
+    Account.findById(req.user.id, function(err, user) {
+      if (err) return next(err);
+      if ( !user ) return;
+
+      if(Account.hasFollowing(user, contactId)) {
         res.render('account/profileById', {
           title: 'Account Management',
+          account: req.account,
           followed: true
         });
-    } else {
-      res.render('account/profileById', {
-        title: 'Account Management',
-        followed: false
-      });
-    }
-  });
+      } else {
+        res.render('account/profileById', {
+          title: 'Account Management',
+          account: req.account,
+          followed: false
+        });
+      }
+    });
+  }, 10);
 };
 
 exports.removeContact = function(req, res, next) {

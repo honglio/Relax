@@ -8,32 +8,32 @@ block content
     .form-group
       label.col-sm-2.control-label(for='email') Email
       .col-sm-4
-        input.form-control(type='email', name='email', id='email', value='#{req.account.email}')
+        input.form-control(type='email', name='email', id='email', value='#{account.email}')
     .form-group
       label.col-sm-2.control-label(for='name') Name
       .col-sm-4
-        input.form-control(type='text', name='name', id='name', value='#{req.account.profile.name}')
+        input.form-control(type='text', name='name', id='name', value='#{account.profile.name}')
     .form-group
       label.col-sm-2.control-label(for='gender') Gender
       .col-sm-4
         label.radio
-          input(type='radio', checked=req.account.profile.gender=='male', name='gender', value='male', data-toggle='radio')
+          input(type='radio', checked=account.profile.gender=='male', name='gender', value='male', data-toggle='radio')
           span Male
         label.radio
-          input(type='radio', checked=req.account.profile.gender=='female', name='gender', value='female', data-toggle='radio')
+          input(type='radio', checked=account.profile.gender=='female', name='gender', value='female', data-toggle='radio')
           span Female
     .form-group
       label.col-sm-2.control-label(for='location') Location
       .col-sm-4
-        input.form-control(type='text', name='location', id='location', value='#{req.account.profile.location}')
+        input.form-control(type='text', name='location', id='location', value='#{account.profile.location}')
     .form-group
       label.col-sm-2.control-label(for='website') Website
       .col-sm-4
-        input.form-control(type='text', name='website', id='website', value='#{req.account.profile.website}')
+        input.form-control(type='text', name='website', id='website', value='#{account.profile.website}')
     .form-group
       label.col-sm-2.control-label(for='gravatar') Gravatar
       .col-sm-4
-        img(src="#{req.account.gravatar()}", class='profile', width='100', height='100')
+        img(src="#{account.gravatar()}", class='profile', width='100', height='100')
 
   form.form-horizontal(action='/account/' + req.account.id + '/contact', method='POST')
     input(type='hidden', name='_csrf', value=_csrf)
@@ -43,3 +43,29 @@ block content
           button.btn.btn-primary(type='submit') Follow
         else
           button.btn.btn-danger(type="submit" name="_method", value="DELETE") UnFollow
+
+  .page-header
+    h3 Followers
+
+  - account.contacts.followers.forEach(function(follower, i) {
+      .row
+        .col-sm-2 Name
+        .col-sm-4 #{follower.profile.name}
+      .row
+        .col-sm-2 Gravatar
+        .col-sm-4
+          img(src="#{follower.gravatar()}", class='profile', width='100', height='100')
+  - })
+
+  .page-header
+    h3 Followings
+
+  - account.contacts.followings.forEach(function(following, i) {
+    .row
+      .col-sm-2 Name
+      .col-sm-4 #{following.profile.name}
+    .row
+      .col-sm-2 Gravatar
+      .col-sm-4
+        img(src="#{following.gravatar()}", class='profile', width='100', height='100')
+  - })

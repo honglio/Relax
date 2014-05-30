@@ -70,12 +70,13 @@ module.exports = function (app, passport) {
   app.post('/account/:uid/contact', passportConf.isAuthenticated, accounts.addContact);
   app.delete('/account/:uid/contact', passportConf.isAuthenticated, accounts.removeContact);
 
+  app.post('/contacts/find/:str', passportConf.isAuthenticated, accounts.findContact);
 
   app.post('/account/profile', passportConf.isAuthenticated, accounts.postUpdateProfile);
   app.post('/account/password', passportConf.isAuthenticated, accounts.postUpdatePassword);
   app.post('/account/delete', passportConf.isAuthenticated, accounts.postDeleteAccount);
   app.get('/account/unlink/:provider', passportConf.isAuthenticated, accounts.getOauthUnlink);
-  app.post('/contacts/find', passportConf.isAuthenticated, accounts.findContact);
+
 
   /**
    * 3rd party account routes.
