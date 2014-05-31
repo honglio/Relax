@@ -72,7 +72,7 @@ exports.create = function (req, res) {
 
   article.uploadAndSave(req.files.image, function (err) {
     if (!err) {
-      req.flash('success', 'Successfully created article!');
+      req.flash('success', {msg: 'Successfully created article!'});
       return res.redirect('/articles/'+article._id);
     }
 
@@ -136,7 +136,7 @@ exports.show = function(req, res){
 exports.destroy = function(req, res){
   var article = req.article;
   article.remove(function(err){
-    req.flash('info', 'Deleted successfully');
+    req.flash('info', {msg: 'Deleted successfully'});
     res.redirect('/articles');
   });
 };

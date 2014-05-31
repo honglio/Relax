@@ -295,7 +295,7 @@ exports.user = {
     console.log(req.profile);
     console.log(req.user);
     if (req.profile.id != req.user.id) {
-      req.flash('info', 'You are not authorized');
+      req.flash('errors', {msg: 'You are not authorized'});
       return res.redirect('/account/' + req.user.id);
     }
     next();
@@ -306,7 +306,7 @@ exports.user = {
 exports.article = {
   isAuthorized: function (req, res, next) {
     if (req.user.id !== req.article.user.id) {
-      req.flash('info', 'You are not authorized');
+      req.flash('errors', {msg: 'You are not authorized'});
       return res.redirect('/articles/' + req.article.id);
     }
     next();
@@ -322,7 +322,7 @@ exports.comment = {
     if (req.user.id === req.comment.user.id || req.user.id === req.article.user.id) {
       next();
     } else {
-      req.flash('info', 'You are not authorized');
+      req.flash('errors', {msg: 'You are not authorized'});
       res.redirect('/articles/' + req.article.id);
     }
   }
