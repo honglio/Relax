@@ -8,7 +8,7 @@ block content
 
   .row
     .col-md-8
-      form.form-horizontal(method="POST", action=action, role="form", accept="/gif, image/jpeg, image/png", enctype="multipart/form-data")
+      form.form-horizontal(method="POST", action=action, role="form", accept="image/gif, image/jpeg, image/png", enctype="multipart/form-data")
 
         input(type="hidden", name="_csrf", value=_csrf)
 

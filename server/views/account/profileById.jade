@@ -44,28 +44,24 @@ block content
         else
           button.btn.btn-danger(type="submit" name="_method", value="DELETE") UnFollow
 
-  .page-header
-    h3 Followers
+  .container-fluid
+    .page-header
+      h3 Followers
 
-  - account.contacts.followers.forEach(function(follower, i) {
-      .row
-        .col-sm-2 Name
-        .col-sm-4 #{follower.profile.name}
-      .row
-        .col-sm-2 Gravatar
-        .col-sm-4
+    .row
+    - account.contacts.followers.forEach(function(follower, i) {
+        .col-sm-2
+          .name #{follower.profile.name}
           img(src="#{follower.gravatar()}", class='profile', width='100', height='100')
-  - })
+    - })
 
-  .page-header
-    h3 Followings
+  .container-fluid
+    .page-header
+      h3 Followings
 
-  - account.contacts.followings.forEach(function(following, i) {
     .row
-      .col-sm-2 Name
-      .col-sm-4 #{following.profile.name}
-    .row
-      .col-sm-2 Gravatar
-      .col-sm-4
-        img(src="#{following.gravatar()}", class='profile', width='100', height='100')
-  - })
+    - account.contacts.followings.forEach(function(following, i) {
+        .col-sm-2
+          .name #{following.profile.name}
+          img(src="#{following.gravatar()}", class='profile', width='100', height='100')
+    - })

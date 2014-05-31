@@ -4,7 +4,7 @@ block content
   h1= article.title
   hr
   .row
-    .col-md-8
+    .col-md-6
       p=article.body
       .meta
         - if (article.user)
@@ -21,7 +21,7 @@ block content
 
         p.text-muted= formatDate(article.createdAt, "%b %d, %Y at %I:%M %p")
 
-    .col-md-4
+    .col-md-6
       - if (!article.isNew && article.image && article.image.filename)
         img(src='http://' + oss.bucket + '.' + oss.host + '/' + article.image.filename)
 
