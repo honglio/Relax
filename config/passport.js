@@ -6,7 +6,7 @@ var _ = require('underscore')
   , RenrenStrategy = require('passport-renren').Strategy
   , WeiboStrategy = require('passport-weibo').Strategy
   , GitHubStrategy = require('passport-github').Strategy
-  , QQStrategy = require('passport-qq').Strategy
+  , QQStrategy = require('passport-tencent').Strategy
   , LinkedInStrategy = require('passport-linkedin-oauth2').Strategy
   , config = require('./config');
 
