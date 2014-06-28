@@ -1,7 +1,9 @@
-Relax
-=============
+# Relax #
+--------
 
-Just another social media written with Node.js and MongoDB
+Just another social media written with Node.js and MongoDB. Relax will allow creating a details profile page, adding photos, following other users, chat, private message, posting on other walls etc.
+
+Relax is a work in progress.
 
 [![Build Status](https://secure.travis-ci.org/honglio/Relax.png?branch=master)](http://travis-ci.org/andzdroid/mongo-express) - Master (stable) branch
 
