@@ -36,7 +36,7 @@ Limitations
 Screenshots
 -----------
 
-<img src="http://honglio.github.io/images/portfolio/big/8.jpg" title="Viewing documents in a collection" />
+<img src="http://honglio.github.io/images/portfolio/big/6.jpg" title="Viewing documents in a collection" />
 
 These screenshots are from version 0.1.0.
 
