@@ -25,7 +25,7 @@ exports.postContact = function(req, res) {
   var from = req.body.email;
   var name = req.body.name;
   var body = req.body.message;
-  var to = 'info@niukj.com';
+  var to = 'info@relax.com';
   var subject = 'Contact Form | Relax';
 
   var mailOptions = {

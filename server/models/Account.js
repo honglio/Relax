@@ -140,7 +140,7 @@ AccountSchema.statics = {
     // Shouldn't use forEach, because callback will block the process. so function return false always.
     var length = account.contacts.followings.length;
     for (var i=0; i<length; i++) {
-      if ( account.contacts.followings[i].accountId == contactId ) return true;
+      if ( account.contacts.followings[i].accountId.toString() == contactId ) return true;
     }
     return false;
   }

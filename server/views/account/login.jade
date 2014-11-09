@@ -1,34 +1,68 @@
 extends ../layout
 
 block content
-  form(method='POST')
-    legend Sign In
-    input(type='hidden', name='_csrf', value=_csrf)
-    .col-sm-8.col-sm-offset-2
-      .form-group
-        label.control-label(for='email') Email
-        input.form-control(type='text', name='email', id='email', placeholder='Email', autofocus=true)
-      .form-group
-        label.control-label(for='password') Password
-        input.form-control(type='password', name='password', id='password', placeholder='Password')
-      .form-group
-        button.btn.btn-primary(type='submit')
-          i.fa.fa-unlock-alt
-          | Login
-        a.btn.btn-link(href='/forgot') Forgot your password?
-      hr
-      a.btn.btn-block.btn-weibo.btn-social(href='/auth/weibo')
-        i.fa.fa-weibo
-        | Sign in with Weibo
-      a.btn.btn-block.btn-renren.btn-social(href='/auth/renren')
-        i.fa.fa-renren
-        | Sign in with Renren
-      a.btn.btn-block.btn-qq.btn-social(href='/auth/qq')
-        i.fa.fa-qq
-        | Sign in with QQ
-      a.btn.btn-block.btn-github.btn-social(href='/auth/github')
-        i.fa.fa-github
-        | Sign in with GitHub
-      a.btn.btn-block.btn-linkedin.btn-social(href='/auth/linkedin')
-        i.fa.fa-linkedin
-        | Sign in with LinkedIn
+  .login-form
+    .login-content
+      form#form_login(method='POST', role='form')
+        .page-header.text-center
+          legend Login
+        input(type='hidden', name='_csrf', value=_csrf)
+        .col-sm-8.col-sm-offset-2
+          .form-group
+            .input-group
+              .input-group-addon
+                i.fa.fa-envelope
+              input.form-control(type='email', name='email', id='email', placeholder='Email', autofocus=true)
+          .form-group
+            .input-group
+              .input-group-addon
+                i.fa.fa-key
+              input.form-control(type='password', name='password', id='password', placeholder='Password')
+          .form-group
+            button.btn.btn-primary.btn-block.btn-login(type='submit')
+              i.fa.fa-unlock-alt
+              | Login
+          .login-bottom-links
+            a.btn.btn-link(href='/forgot') Forgot your password?
+          .text-center
+            em - or -
+          hr
+          .text-center
+            h3  Login in with
+
+          .col-sm-4
+            .panel.panel-default
+              .panel-body
+                img(src='http://www.rjjulia.com/files/rjjulia/twitter_icon-jpg1.png', height=40)
+                a(href='/auth/twitter')  Twitter
+          .col-sm-4
+            .panel.panel-default
+              .panel-body.text-center
+                img(src='https://github.global.ssl.fastly.net/images/modules/logos_page/Octocat.png', height=40)
+                a(href='/auth/github')  GitHub
+          .col-sm-4
+            .panel.panel-default
+              .panel-body
+                img(src='http://kellycpas.com/wp-content/uploads/2014/01/linkedin.png', height=40)
+                a(href='/auth/linkedin')  LinkedIn
+          .col-sm-4
+            .panel.panel-default
+              .panel-body
+                img(src='http://files.techcrunch.cn/2014/03/sina-weibo-logo-yuanwenjian-xiazai-thumbnail.gif', height=40)
+                a(href='/auth/weibo')  Weibo
+          .col-sm-4
+            .panel.panel-default
+              .panel-body
+                img(src='http://media.pocketgamer.biz/2012/11/4055/renren-logo-r225x.jpg', height=40)
+                a(href='/auth/renren')  Renren
+          .col-sm-4
+            .panel.panel-default
+              .panel-body
+                img(src='http://i.imgur.com/mec5qeZ.jpg?1', height=40)
+                a(href='/auth/qq')  QQ
+
+          br
+          .row.text-center
+            a(href='#') ToS
+            | -
+            a(href='#') Privacy Policy

@@ -11,23 +11,24 @@ var auth = require('../server/controllers/auth');
 var api = require('../server/controllers/api');
 var contactForm = require('../server/controllers/contactForm');
 var passportConf = require('./passport');
+var crypto = require('crypto');
 
 /*
  * Routes Example
  *
  * Name       Method    Path
  * ---------------------------------------------
- * Index      GET     /restaurants
- * Show       GET     /restaurants/:id
- * New        GET     /restaurants/new
- * Create     POST    /restaurants
- * Edit       GET     /restaurants/edit
- * Update       PUT     /restaurants/:id
- * Delete       GET     /restaurants/delete
- * Destroy      DELETE    /restaurants/:id
- * Search     GET     /restaurants/search?<query>
- * Showcodes    GET     /restaurants/:id/codes
- * Generatecodes  GET     /restaurants/:id/generate?n=<number>
+ * Index      GET     /articles
+ * Show       GET     /articles/:id
+ * New        GET     /articles/new
+ * Create     POST    /articles
+ * Edit       GET     /articles/edit
+ * Update       PUT     /articles/:id
+ * Delete       GET     /articles/delete
+ * Destroy      DELETE    /articles/:id
+ * Search     GET     /articles/search?<query>
+ * Showcodes    GET     /articles/:id/codes
+ * Generatecodes  GET     /articles/:id/generate?n=<number>
  */
 
 module.exports = function (app, passport) {
@@ -45,11 +46,11 @@ module.exports = function (app, passport) {
   app.get('/signup', index.signup);
   app.get('/forgot', index.forgot);
   app.get('/api', index.api);
-  app.get('/contactForm', index.contactForm);
 
   /**
    * Contact From routes.
    */
+  app.get('/contactForm', index.contactForm);
   app.post('/contactForm', contactForm.postContact);
 
   /**
@@ -66,17 +67,19 @@ module.exports = function (app, passport) {
    */
   app.param('uid', accounts.load);
 
-  app.get('/account/:uid', passportConf.isAuthenticated, accounts.accountbyId);
-  app.post('/account/:uid/contact', passportConf.isAuthenticated, accounts.addContact);
-  app.delete('/account/:uid/contact', passportConf.isAuthenticated, accounts.removeContact);
-
   app.post('/contacts/find/:str', passportConf.isAuthenticated, accounts.findContact);
-
   app.post('/account/profile', passportConf.isAuthenticated, accounts.postUpdateProfile);
+  app.get('/account/password', passportConf.isAuthenticated, accounts.getUpdatePassword);
   app.post('/account/password', passportConf.isAuthenticated, accounts.postUpdatePassword);
+  app.get('/account/manage', passportConf.isAuthenticated, accounts.getManage);
   app.post('/account/delete', passportConf.isAuthenticated, accounts.postDeleteAccount);
   app.get('/account/unlink/:provider', passportConf.isAuthenticated, accounts.getOauthUnlink);
 
+  app.get('/account/:uid', passportConf.isAuthenticated, accounts.accountbyId);
+  app.get('/account/:uid/followers', passportConf.isAuthenticated, accounts.followerbyId);
+  app.get('/account/:uid/followings', passportConf.isAuthenticated, accounts.followingbyId);
+  app.post('/account/:uid/contact', passportConf.isAuthenticated, accounts.addContact);
+  app.delete('/account/:uid/contact', passportConf.isAuthenticated, accounts.removeContact);
 
   /**
    * 3rd party account routes.

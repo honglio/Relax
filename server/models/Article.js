@@ -91,7 +91,7 @@ ArticleSchema.methods = {
     oss.putObject({
       bucket: config.oss.bucket,
       object: image.name,
-      source: image.path,
+      source: image.src,
       headers: {}
     }, function (err, res) {
       if (err) {
@@ -135,7 +135,7 @@ ArticleSchema.methods = {
 
   removeComment: function (commentId, cb) {
     var index = utils.indexof(this.comments, { id: commentId });
-    if (~index) this.comments.splice(index, 1);
+    if (index !== -1) this.comments.splice(index, 1);
     else return cb('not found');
     this.save(cb);
   }

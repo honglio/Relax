@@ -2,7 +2,7 @@ extends ../layout
 
 block content
   h1= title
-  hr
+
   - if (articles.length)
     - each article in articles
       .article
@@ -30,8 +30,9 @@ block content
               | &nbsp;&nbsp;
 
     - if (pages > 1)
-      ul.pagination
-        != createPagination(pages, page)
+      .text-center
+        ul.pagination
+          != createPagination(pages, page)
   - else
     h4.text-muted No articles.&nbsp;
       a(href="/articles/new") create one

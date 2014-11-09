@@ -1,17 +1,23 @@
 extends ../layout
 
 block content
-  .col-sm-8.col-sm-offset-2
-    form(method='POST')
-      legend Reset Password
-      input(type='hidden', name='_csrf', value=_csrf)
-      .form-group
-        label(for='password') New Password:
-        input.form-control(type='password', name='password', value='', placeholder='New password', autofocus=true)
-      .form-group
-        label(for='confirm') Confirm Password:
-        input.form-control(type='password', name='confirm', value='', placeholder='Confirm password')
-      .form-group
-        button.btn.btn-primary.btn-reset(type='submit')
-          i.fa.fa-keyboard-o
-          | Change Password
+  .container-fluid
+    .page-header
+      h2.text-center= title
+    section.row
+      .col-xs-12.col-sm-8.col-md-6.col-sm-offset-2.col-md-offset-3
+        form.form-horizontal(role='reset' method='POST')
+          input(type='hidden' name='_csrf' value=_csrf)
+          .form-group
+            label.col-md-3.control-label(for='password') New Password:
+            .col-md-9
+              input.form-control(type='password' name='password' placeholder='New password' autofocus required)
+          .form-group
+            label.col-md-3.control-label(for='confirm') Confirm Password:
+            .col-md-9
+              input.form-control(type='password' name='confirm' placeholder='Confirm password' required)
+          .form-group
+            .col-md-6.col-md-offset-3
+              button.btn.btn-primary.btn-reset(type='submit')
+                i.fa.fa-keyboard-o
+                | Change Password

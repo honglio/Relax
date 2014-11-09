@@ -1,67 +1,72 @@
 extends ../layout
 
 block content
-  .page-header
-    h3 Profile Information
-  form.form-horizontal(method='GET')
-    input(type='hidden', name='_csrf', value=_csrf)
-    .form-group
-      label.col-sm-2.control-label(for='email') Email
-      .col-sm-4
-        input.form-control(type='email', name='email', id='email', value='#{account.email}')
-    .form-group
-      label.col-sm-2.control-label(for='name') Name
-      .col-sm-4
-        input.form-control(type='text', name='name', id='name', value='#{account.profile.name}')
-    .form-group
-      label.col-sm-2.control-label(for='gender') Gender
-      .col-sm-4
-        label.radio
-          input(type='radio', checked=account.profile.gender=='male', name='gender', value='male', data-toggle='radio')
-          span Male
-        label.radio
-          input(type='radio', checked=account.profile.gender=='female', name='gender', value='female', data-toggle='radio')
-          span Female
-    .form-group
-      label.col-sm-2.control-label(for='location') Location
-      .col-sm-4
-        input.form-control(type='text', name='location', id='location', value='#{account.profile.location}')
-    .form-group
-      label.col-sm-2.control-label(for='website') Website
-      .col-sm-4
-        input.form-control(type='text', name='website', id='website', value='#{account.profile.website}')
-    .form-group
-      label.col-sm-2.control-label(for='gravatar') Gravatar
-      .col-sm-4
-        img(src="#{account.gravatar()}", class='profile', width='100', height='100')
+  .container
 
-  form.form-horizontal(action='/account/' + req.account.id + '/contact', method='POST')
-    input(type='hidden', name='_csrf', value=_csrf)
-    .form-group
-      .col-sm-offset-2.col-sm-10
-        if !followed
-          button.btn.btn-primary(type='submit') Follow
-        else
-          button.btn.btn-danger(type="submit" name="_method", value="DELETE") UnFollow
+    h3.text-center= title
+    hr
+    section.row
+      .col-sm-2.col-sm-offset-2
+        a.profile-picture(href='#')
+          img.img-responsive.img-circle(src='#{account.gravatar()}')
+      .col-sm-4
+        ul.profile-info-sections
+          li
+            .profile-stat
+              h6
+                i.fa.fa-user
+                | &nbsp; Username:
+                span=  account.profile.name || 'unknown'
+          li
+            .profile-stat
+              p
+                i.fa.fa-envelope
+                | &nbsp; Email:
+                span= account.email || 'unknown'
+          li
+            .profile-stat
+              p
+                i.fa.fa-map-marker
+                | &nbsp; Location:
+                span= account.profile.location || 'unknown'
+          li
+            .profile-stat
+              p
+                i.fa.fa-briefcase
+                | &nbsp; Website:
+                span= account.profile.website || 'unknown'
+          li
+            .profile-stat
+              p
+                i.fa.fa-male
+                | &nbsp; Gender:
+                span= account.profile.gender || 'unknown'
 
-  .container-fluid
-    .page-header
-      h3 Followers
+        form.form-horizontal(action='/account/' + account.id + '/contact' method='POST' enctype="application/x-www-form-urlencoded")
+          input(type='hidden', name='_csrf', value=_csrf)
+          .form-group
+          if !followed
+            button.btn.btn-primary(type='submit')
+              i.fa.fa-user
+              |  Follow
+          else
+            button.btn.btn-danger(type="submit" name="_method", value="DELETE")
+              i.fa.fa-user
+              |  UnFollow
 
-    .row
-    - account.contacts.followers.forEach(function(follower, i) {
-        .col-sm-2
-          .name #{follower.profile.name}
-          img(src="#{follower.gravatar()}", class='profile', width='100', height='100')
-    - })
+      .col-sm-4
+        ul.follow-info
+          li
+            .profile-stat
+              h3 #{account.contacts.followers.length}
+              span
+                a(href='/account/' + account.id + '/followers') Followers
+          li
+            .profile-stat
+              h3 #{account.contacts.followings.length}
+              span
+                a(href='/account/' + account.id + '/followings') Followings
 
-  .container-fluid
-    .page-header
-      h3 Followings
 
-    .row
-    - account.contacts.followings.forEach(function(following, i) {
-        .col-sm-2
-          .name #{following.profile.name}
-          img(src="#{following.gravatar()}", class='profile', width='100', height='100')
-    - })
+
+

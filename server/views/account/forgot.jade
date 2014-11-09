@@ -1,15 +1,20 @@
 extends ../layout
 
 block content
-  .col-sm-8.col-sm-offset-2
-    form(method='POST')
-      legend Forgot Password
-      input(type='hidden', name='_csrf', value=_csrf)
-      .form-group
-        p Enter your email address below and we will send you password reset instructions.
-        label.control-label(for='email') Email
-        input.form-control(type='email', name='email', id='email', placeholder='Email', autofocus=true)
-      .form-group
-        button.btn.btn-primary(type='submit')
-          i.fa.fa-key
-          | Reset Password
+  .container-fluid
+    .page-header
+      h2.text-center= title
+    section.row
+      .col-xs-12.col-sm-8.col-md-6.col-sm-offset-2.col-md-offset-3
+        h5.centered Enter your email address below and we will send you password reset instructions.
+        form.form-horizontal(role='forgot' method='POST')
+          input(type='hidden' name='_csrf' value=_csrf)
+          .form-group
+            label.col-md-3.control-label(for='email') Email
+            .col-md-8
+              input.form-control(type='email' name='email' placeholder='Email' autofocus required)
+          .form-group
+            .col-md-6.col-md-offset-3
+              button.btn.btn-primary(type='submit')
+                i.fa.fa-key
+                | Reset Password

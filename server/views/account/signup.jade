@@ -1,23 +1,29 @@
 extends ../layout
 
 block content
-  form.form-horizontal(id='signup-form', method='POST')
-    input(type='hidden', name='_csrf', value=_csrf)
-    legend Signup
-    .form-group
-      label.col-sm-3.control-label(for='email') Email
-      .col-sm-7
-        input.form-control(type='email', name='email', id='email', placeholder='Email', autofocus)
-    .form-group
-      label.col-sm-3.control-label(for='password') Password
-      .col-sm-7
-        input.form-control(type='password', name='password', id='password', placeholder='Password')
-    .form-group
-      label.col-sm-3.control-label(for='confirmPassword') Confirm Password
-      .col-sm-7
-        input.form-control(type='password', name='confirmPassword', id='confirmPassword', placeholder='Confirm Password')
-    .form-group
-      .col-sm-offset-3.col-sm-7
-        button.btn.btn-success(type='submit')
-          i.fa.fa-check
-          | Signup
+  .login-form
+    .login-content
+      form#signup-form.form-horizontal(method='POST', role='form')
+        input(type='hidden', name='_csrf', value=_csrf)
+        .page-header.text-center
+          legend Signup
+        .col-sm-8.col-sm-offset-2
+          .form-group
+            .input-group
+              .input-group-addon
+                i.fa.fa-envelope
+              input.form-control(type='email', name='email', id='email', placeholder='Email', autofocus)
+          .form-group
+            .input-group
+              .input-group-addon
+                i.fa.fa-key
+              input.form-control(type='password', name='password', id='password', placeholder='Password')
+          .form-group
+            .input-group
+              .input-group-addon
+                i.fa.fa-lock
+              input.form-control(type='password', name='confirmPassword', id='confirmPassword', placeholder='Comfirm Password')
+          .form-group
+            button.btn.btn-success.btn-block.btn-login(type='submit')
+              i.fa.fa-check
+                | Signup

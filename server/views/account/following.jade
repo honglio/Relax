@@ -1,0 +1,51 @@
+extends ../layout
+
+block content
+  .container
+    section.row
+      .col-md-12
+        a.profile-picture.pull-left.pull-none-xsm(href='#')
+          img.img-responsive.img-circle(src='#{account.gravatar()}' width='70')
+        .profile-name(style="margin:0 100px;padding-top:25px;")
+          strong
+            a(href='/account/' + account.id) #{account.profile.name || '未填'}
+          &#160;&#160;&#160;
+          span= account.email
+
+    hr
+
+    .row
+      .col-md-9.col-sm-7
+        h2= title
+      .col-md-3.col-sm-5
+        form.search-form-full(method='get', role='form')
+          .form-group
+            input#search-input.form-control(type='text', name='s', placeholder='Search...')
+            i.fa.fa-search
+    // Member Entries
+    - each following in account.contacts.followings
+      .member-entry
+        .member-img
+          img.img-rounded(src='#{following.gravatar()}', alt='', width='60')
+        .member-details
+          h4
+            a(href='/account/' + following.id) #{following.profile.name || '未填'}
+          .row.info-list
+            .col-sm-4
+              i.fa.fa-envelope
+              | &nbsp; Email：
+              a.text-primary.strong(href='') #{following.profile.email || '未填'}
+            .col-sm-4
+              i.fa.fa-map-marker
+              | &nbsp; Location：
+              a.text-primary.strong(href='') #{following.profile.location || '未填'}
+            .col-sm-4
+              i.fa.fa-briefcase
+              | &nbsp; Website：
+              a.text-primary.strong(href='') #{following.profile.website || '未填'}
+            .clear
+            .col-sm-4
+              i.fa.fa-male
+              | &nbsp; Gender：
+              a.text-primary.strong(href='') #{following.profile.gender || '未填'}
+

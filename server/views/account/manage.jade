@@ -1,0 +1,41 @@
+extends ../layout
+
+block content
+  .container-fluid
+    .page-header
+      h2.text-center= title
+    section.row
+      .col-xs-12.col-sm-8.col-md-6.col-sm-offset-2.col-md-offset-3
+        h3 Linked Accounts
+        hr
+
+        p You can delete your account, but keep in mind this action is irreversible.
+        form(action='/account/delete', method='POST')
+          input(type='hidden', name='_csrf', value=_csrf)
+          button.btn.btn-danger(type='submit')
+            i.fa.fa-trash-o
+            |  Delete my account
+
+        br
+        br
+        h3 关联的账户
+        hr
+        if user.qq
+          p: a.btn.btn-danger(href='/account/unlink/qq') Unlink your QQ account
+        else
+          p: a.btn.btn-default(href='/auth/qq') Link your QQ account
+
+        if user.weibo
+          p: a.btn.btn-danger(href='/account/unlink/weibo') Unlink your Weibo account
+        else
+          p: a.btn.btn-default(href='/auth/weibo') Link your Weibo account
+
+        if user.renren
+          p: a.btn.btn-danger(href='/account/unlink/renren') Unlink your Renren account
+        else
+          p: a.btn.btn-default(href='/auth/renren') Link your Renren account
+
+        if user.linkedin
+          p: a.btn.btn-danger(href='/account/unlink/linkedin') Unlink your LinkedIn account
+        else
+          p: a.btn.btn-default(href='/auth/linkedin') Link your LinkedIn account

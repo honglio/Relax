@@ -1,10 +1,13 @@
 - if (comment && comment.user)
   .comment
-    - var name = comment.user.profile.name ? comment.user.profile.name : comment.user.email
-    p
-      a(href='/account/'+comment.user._id)= name
-      |  :&nbsp;
-      = comment.body
+    .comment-thumb
+      img.img-circle(src='#{comment.user.gravatar()}', height='40')
+    .comment-content
+      - var name = comment.user.profile.name ? comment.user.profile.name : comment.user.email
+      p
+        a(href='/account/'+comment.user._id)= name
+        |  :&nbsp;
+        = comment.body
 
     p.text-muted
       form.form-inline(role='form', method='POST', action='/articles/' + article._id + '/comments/' + comment._id, onsubmit='return confirm("Are you sure?")')
