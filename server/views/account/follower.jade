@@ -8,7 +8,7 @@ block content
           img.img-responsive.img-circle(src='#{account.gravatar()}' width='70')
         .profile-name(style="margin:0 100px;padding-top:25px;")
           strong
-            a(href='/account/' + account.id) #{account.profile.name || '未填'}
+            a(href='/account/' + account.id) #{account.profile.name || 'unknown'}
           &#160;&#160;&#160;
           span= account.email
 
@@ -29,22 +29,22 @@ block content
           img.img-rounded(src='#{follower.gravatar()}', alt='', width='60')
         .member-details
           h4
-            a(href='/account/' + follower.id) #{follower.profile.name || '未填'}
+            a(href='/account/' + follower.id) #{follower.profile.name || 'unknown'}
           .row.info-list
             .col-sm-4
               i.fa.fa-envelope
               | &nbsp; 电子邮件：
-              a.text-primary.strong(href='') #{follower.profile.email || '未填'}
+              a.text-primary.strong(href='') #{follower.profile.email || 'unknown'}
             .col-sm-4
               i.fa.fa-map-marker
               | &nbsp; 地址：
-              a.text-primary.strong(href='') #{follower.profile.location || '未填'}
+              a.text-primary.strong(href='') #{follower.profile.location || 'unknown'}
             .col-sm-4
               i.fa.fa-briefcase
               | &nbsp; 网站：
-              a.text-primary.strong(href='') #{follower.profile.website || '未填'}
+              a.text-primary.strong(href='') #{follower.profile.website || 'unknown'}
             .clear
             .col-sm-4
               i.fa.fa-male
               | &nbsp; 性别：
-              a.text-primary.strong(href='') #{follower.profile.gender || '未填'}
+              a.text-primary.strong(href='') #{follower.profile.gender || 'unknown'}
