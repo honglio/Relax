@@ -37,7 +37,6 @@ Screenshots
 -----------
 
 <img src="http://honglio.github.io/images/portfolio/big/3.jpg" title="Login Page" />
-<img src="http://honglio.github.io/images/portfolio/big/4.jpg" title="Follower Page" />
 These screenshots are from version 0.3.0.
 
 
